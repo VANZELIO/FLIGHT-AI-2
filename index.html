@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flight AI (FLI) — AI Assistant</title>
+<meta name="description" content="Flight AI, also known as FLI, is a fast AI assistant for chat, coding, files, images, and everyday questions.">
+<meta name="application-name" content="Flight AI">
+<meta property="og:title" content="Flight AI (FLI) — AI Assistant">
+<meta property="og:description" content="Flight AI (FLI) — chat, coding, files, images, and everyday AI assistance in one place.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Flight AI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flight AI (FLI) — AI Assistant">
+<meta name="twitter:description" content="Flight AI (FLI) — a fast AI assistant for chat, coding, files, images, and everyday questions.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236ea8fe'/><stop offset='1' stop-color='%23a78bfa'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><path d='M12 34 L52 14 L44 50 L32 40 Z' fill='%2307101f'/></svg>">
+<style>
+:root{
+  --bg:#0a0c11;--bg2:#0d1016;--panel:#11141c;--panel2:#161a24;--panel3:#1c2130;
+  --line:#232838;--text:#e7eaf2;--muted:#8a92a6;--muted2:#606a80;
+  --accent:#6ea8fe;--accent2:#a78bfa;--danger:#ff6b6b;--ok:#4ade80;
+  --r-sm:10px;--shadow:0 12px 40px rgba(0,0,0,.45);
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+}
+[data-theme="light"]{
+  --bg:#f5f6fb;--bg2:#eceef7;--panel:#ffffff;--panel2:#f7f8fc;--panel3:#eef0f8;
+  --line:#e0e3ee;--text:#141824;--muted:#66708a;--muted2:#8a93a8;
+  --shadow:0 12px 40px rgba(30,40,80,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input,textarea,select{font-family:inherit;color:inherit}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;border:3px solid transparent;background-clip:content-box}
+::-webkit-scrollbar-thumb:hover{background:var(--muted2);background-clip:content-box}
+::-webkit-scrollbar-track{background:transparent}
+.app{display:flex;height:100vh;height:100dvh;overflow:hidden}
+
+.sidebar{width:272px;flex:0 0 272px;background:var(--bg2);border-right:1px solid var(--line);display:flex;flex-direction:column;transition:margin-left .22s ease}
+.sidebar.hidden{margin-left:-272px}
+.brand{display:flex;align-items:center;gap:10px;padding:18px 18px 12px}
+.brand .mark{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:16px;background:linear-gradient(140deg,var(--accent),var(--accent2));color:#07101f;font-weight:800;box-shadow:0 6px 18px rgba(110,168,254,.28)}
+.brand h1{font-size:16px;font-weight:650;letter-spacing:.2px}
+.brand small{display:block;font-size:10.5px;color:var(--muted2);font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.newchat{margin:6px 14px 12px;padding:11px 14px;border-radius:var(--r-sm);background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:550;transition:.16s}
+.newchat:hover{background:var(--panel2);border-color:var(--accent)}
+.newchat .plus{font-size:17px;line-height:1;color:var(--accent)}
+.sessions{flex:1;overflow-y:auto;padding:0 10px 10px}
+.sess-group{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted2);padding:12px 10px 6px;font-weight:600}
+.sess{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:13.2px;color:var(--muted);cursor:pointer;transition:.13s;position:relative}
+.sess:hover{background:var(--panel);color:var(--text)}
+.sess.active{background:var(--panel2);color:var(--text);font-weight:550}
+.sess.active::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:2.5px;border-radius:2px;background:linear-gradient(var(--accent),var(--accent2))}
+.sess .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sess .del{opacity:0;font-size:14px;color:var(--muted2);padding:2px 4px;border-radius:5px}
+.sess:hover .del{opacity:1}
+.sess .del:hover{color:var(--danger);background:var(--panel3)}
+.sidefoot{padding:10px 14px 16px;border-top:1px solid var(--line);display:flex;gap:8px}
+.sidefoot button{flex:1;padding:9px;border-radius:9px;background:var(--panel);border:1px solid var(--line);font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.sidefoot button:hover{color:var(--text);border-color:var(--accent)}
+
+main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.topbar{height:56px;flex:0 0 56px;display:flex;align-items:center;gap:10px;padding:0 14px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);z-index:5}
+.icon-btn{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-size:15px;color:var(--muted);transition:.15s}
+.icon-btn:hover{background:var(--panel);color:var(--text)}
+.router-wrap{flex:1;display:flex;justify-content:center;align-items:center}
+.router-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:12px;font-weight:600;color:var(--text);letter-spacing:.3px;transition:.2s}
+.router-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px color-mix(in srgb,var(--ok) 70%,transparent);animation:pulse 2s ease-in-out infinite;flex:0 0 7px}
+.router-pill.working{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
+.router-pill.working .dot{background:var(--accent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 80%,transparent);animation-duration:.9s}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+.chat{flex:1;overflow-y:auto;scroll-behavior:smooth}
+.chat-inner{max-width:820px;margin:0 auto;padding:26px 20px 8px}
+.welcome{display:flex;flex-direction:column;align-items:center;text-align:center;padding:8vh 20px 30px}
+.welcome .glow{width:74px;height:74px;border-radius:22px;display:grid;place-items:center;font-size:34px;background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 18px 50px rgba(110,168,254,.30);margin-bottom:22px}
+.welcome h2{font-size:26px;font-weight:680;letter-spacing:-.4px;margin-bottom:8px}
+.welcome p{color:var(--muted);font-size:14px;max-width:460px;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;margin-top:26px;max-width:640px}
+.chip{padding:10px 15px;border-radius:11px;background:var(--panel);border:1px solid var(--line);font-size:12.8px;color:var(--muted);transition:.16s}
+.chip:hover{border-color:var(--accent);color:var(--text);transform:translateY(-1px)}
+.msg{display:flex;gap:14px;padding:16px 0;animation:rise .28s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.msg .av{width:30px;height:30px;flex:0 0 30px;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:700;letter-spacing:.3px}
+.msg.user .av{background:var(--panel3);color:var(--muted);border:1px solid var(--line)}
+.msg.assistant .av{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#07101f}
+.msg .body{flex:1;min-width:0;padding-top:3px}
+.msg .who{font-size:11.5px;font-weight:650;color:var(--muted2);letter-spacing:.4px;text-transform:uppercase;margin-bottom:7px}
+.content{font-size:14.6px;line-height:1.72;word-wrap:break-word;overflow-wrap:anywhere}
+.content>*:first-child{margin-top:0}
+.content>*:last-child{margin-bottom:0}
+.content p{margin:0 0 13px}
+.content h1,.content h2,.content h3,.content h4{font-weight:650;line-height:1.35;margin:22px 0 11px;letter-spacing:-.2px}
+.content h1{font-size:21px}.content h2{font-size:18px}.content h3{font-size:16px}.content h4{font-size:14.5px}
+.content ul,.content ol{margin:0 0 13px;padding-left:22px}
+.content li{margin:5px 0}
+.content li::marker{color:var(--muted2)}
+.content a{color:var(--accent);text-decoration:none;border-bottom:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+.content a:hover{border-bottom-color:var(--accent)}
+.content blockquote{border-left:2.5px solid var(--accent);padding:2px 0 2px 14px;margin:0 0 13px;color:var(--muted);font-style:italic}
+.content hr{border:none;border-top:1px solid var(--line);margin:20px 0}
+.content code:not(pre code){font-family:var(--mono);font-size:12.8px;background:var(--panel3);padding:2px 6px;border-radius:5px;border:1px solid var(--line);color:#c7d3ff}
+[data-theme="light"] .content code:not(pre code){color:#4a5bd4}
+.content table{width:100%;border-collapse:collapse;margin:0 0 14px;font-size:13.4px;display:block;overflow-x:auto}
+.content th,.content td{border:1px solid var(--line);padding:8px 11px;text-align:left}
+.content th{background:var(--panel2);font-weight:620}
+.content img{max-width:100%;border-radius:var(--r-sm);margin:6px 0}
+.content del{color:var(--muted2)}
+.code-wrap{border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden;margin:0 0 14px;background:var(--panel)}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:var(--panel2);border-bottom:1px solid var(--line);font-size:11px;color:var(--muted2);font-family:var(--mono);letter-spacing:.5px}
+.code-copy{font-size:11px;color:var(--muted2);padding:3px 9px;border-radius:6px;border:1px solid transparent;transition:.15s;font-family:var(--sans)}
+.code-copy:hover{color:var(--text);border-color:var(--line);background:var(--panel3)}
+pre{margin:0;padding:14px;overflow-x:auto;font-family:var(--mono);font-size:12.9px;line-height:1.62}
+pre code{font-family:inherit}
+.tk-c{color:#5c6a86;font-style:italic}
+.tk-s{color:#8ee08e}
+.tk-n{color:#f0b072}
+.tk-k{color:#c79bff}
+[data-theme="light"] .tk-c{color:#8a94ab}
+[data-theme="light"] .tk-s{color:#1f8f45}
+[data-theme="light"] .tk-n{color:#c1671a}
+[data-theme="light"] .tk-k{color:#7c3aed}
+.cursor{display:inline-block;width:7px;height:15px;background:var(--accent);border-radius:2px;vertical-align:-2px;animation:blink 1s steps(2) infinite;margin-left:2px}
+@keyframes blink{0%,50%{opacity:1}51%,100%{opacity:0}}
+.msg-actions{display:flex;gap:4px;margin-top:9px;opacity:0;transition:.16s}
+.msg:hover .msg-actions{opacity:1}
+.msg-actions button{font-size:11.5px;color:var(--muted2);padding:4px 9px;border-radius:7px;border:1px solid transparent;transition:.14s}
+.msg-actions button:hover{color:var(--text);background:var(--panel);border-color:var(--line)}
+.att-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.att-thumb{border-radius:10px;overflow:hidden;border:1px solid var(--line);max-width:190px;background:var(--panel)}
+.att-thumb img{display:block;width:100%;max-height:190px;object-fit:cover}
+.att-file{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);font-size:12.4px;color:var(--muted);max-width:260px}
+.att-file .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gen-img{max-width:100%;border-radius:12px;border:1px solid var(--line);display:block;margin:4px 0 8px;box-shadow:var(--shadow)}
+.img-bar{display:flex;gap:7px;margin-top:2px}
+.img-bar button{font-size:11.5px;color:var(--muted2);padding:5px 11px;border-radius:7px;border:1px solid var(--line);transition:.15s}
+.img-bar button:hover{color:var(--text);border-color:var(--accent)}
+.err{border-left:2.5px solid var(--danger);padding:8px 0 8px 13px;color:#ff9d9d;font-size:13px;font-family:var(--mono);line-height:1.6;white-space:pre-wrap;word-break:break-word}
+[data-theme="light"] .err{color:#c0392b}
+
+.composer-wrap{padding:0 20px 16px;background:linear-gradient(to top,var(--bg) 72%,transparent)}
+.composer-box{max-width:820px;margin:0 auto}
+.att-tray{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:9px}
+.att-chip{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 10px;border-radius:9px;background:var(--panel);border:1px solid var(--line);font-size:12px;color:var(--muted);max-width:230px}
+.att-chip img{width:26px;height:26px;border-radius:6px;object-fit:cover}
+.att-chip .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.att-chip button{color:var(--muted2);font-size:14px;line-height:1;padding:2px 4px;border-radius:5px}
+.att-chip button:hover{color:var(--danger);background:var(--panel3)}
+.composer{display:flex;align-items:flex-end;gap:6px;padding:9px 9px 9px 12px;background:var(--panel);border:1px solid var(--line);border-radius:18px;transition:.18s;box-shadow:var(--shadow)}
+.composer:focus-within{border-color:color-mix(in srgb,var(--accent) 60%,var(--line))}
+.composer textarea{flex:1;background:none;border:none;outline:none;resize:none;font-size:14.6px;line-height:1.6;padding:8px 2px;max-height:200px;min-height:24px}
+.composer textarea::placeholder{color:var(--muted2)}
+.cbtn{width:36px;height:36px;flex:0 0 36px;border-radius:11px;display:grid;place-items:center;font-size:15px;color:var(--muted);transition:.15s}
+.cbtn:hover{background:var(--panel3);color:var(--text)}
+.cbtn.active{color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.send{width:36px;height:36px;flex:0 0 36px;border-radius:11px;display:grid;place-items:center;font-size:15px;background:linear-gradient(140deg,var(--accent),var(--accent2));color:#07101f;transition:.15s}
+.send:hover{filter:brightness(1.1)}
+.send.stop{background:var(--danger);color:#fff}
+.hint{text-align:center;font-size:11px;color:var(--muted2);margin-top:9px;letter-spacing:.2px}
+
+.scrim{position:fixed;inset:0;background:rgba(4,6,12,.7);backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px;z-index:50;animation:fade .18s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.modal{width:100%;max-width:600px;max-height:86vh;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:scale(.97) translateY(6px)}to{opacity:1;transform:none}}
+.modal-h{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line)}
+.modal-h h3{font-size:15.5px;font-weight:650}
+.modal-b{padding:18px 20px}
+.field{margin-bottom:17px}
+.field label{display:block;font-size:12px;font-weight:620;color:var(--muted);margin-bottom:7px;letter-spacing:.2px}
+.field input[type=text],.field input[type=password],.field textarea,.field select{width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;font-size:13.2px;outline:none;transition:.15s}
+.field textarea{resize:vertical;min-height:88px;line-height:1.6;font-size:13px}
+.field select{cursor:pointer;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.field .sub{font-size:11px;color:var(--muted2);margin-top:6px;line-height:1.5}
+.field .mono{font-family:var(--mono);font-size:12px;letter-spacing:.2px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:14px}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.switch{position:relative;width:42px;height:24px;flex:0 0 42px;border-radius:20px;background:var(--panel3);border:1px solid var(--line);transition:.18s;cursor:pointer}
+.switch::after{content:"";position:absolute;top:2.5px;left:3px;width:17px;height:17px;border-radius:50%;background:var(--muted);transition:.18s}
+.switch.on{background:color-mix(in srgb,var(--accent) 28%,transparent);border-color:var(--accent)}
+.switch.on::after{left:21px;background:var(--accent)}
+.modal-f{display:flex;gap:9px;justify-content:flex-end;padding:16px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.btn{padding:10px 18px;border-radius:10px;font-size:13.2px;font-weight:560;border:1px solid var(--line);background:var(--panel2);transition:.15s}
+.btn:hover{border-color:var(--muted2)}
+.btn.primary{background:linear-gradient(140deg,var(--accent),var(--accent2));color:#07101f;border-color:transparent}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 35%,transparent);margin-right:auto}
+.btn.danger:hover{background:color-mix(in srgb,var(--danger) 12%,transparent)}
+.toasts{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:100;align-items:center}
+.toast{padding:11px 17px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);font-size:13px;box-shadow:var(--shadow);animation:pop .2s ease;max-width:80vw}
+.toast.bad{border-color:color-mix(in srgb,var(--danger) 45%,transparent);color:#ffb3b3}
+[data-theme="light"] .toast.bad{color:#b03030}
+@media (max-width:860px){
+  .sidebar{position:fixed;z-index:40;height:100%;box-shadow:var(--shadow)}
+  .sidebar.hidden{margin-left:-272px}
+  .chat-inner{padding:18px 14px 6px}
+  .composer-wrap{padding:0 12px 12px}
+  .welcome{padding-top:5vh}
+  .welcome h2{font-size:22px}
+}
+</style>
+
+<style id="flight-auth-addition">
+  #flightAuthOverlay{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:20px;background:rgba(4,6,12,.82);backdrop-filter:blur(18px)}
+  #flightAuthCard{width:min(430px,calc(100vw - 32px));background:#11141c;border:1px solid #2a3040;border-radius:20px;box-shadow:0 24px 90px rgba(0,0,0,.55);padding:28px;color:#e7eaf2}
+  #flightAuthLogo{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,#6ea8fe,#a78bfa);color:#07101f;font-weight:800;font-size:22px;margin-bottom:16px}
+  #flightAuthCard h2{font-size:23px;margin-bottom:7px}
+  #flightAuthSub{font-size:13px;color:#8a92a6;line-height:1.55;margin-bottom:20px}
+  .fa-input{width:100%;padding:12px 13px;margin-bottom:10px;background:#0d1016;border:1px solid #232838;border-radius:10px;color:#e7eaf2;outline:none}
+  .fa-input:focus{border-color:#6ea8fe}
+  .fa-btn{width:100%;padding:11px 14px;border-radius:10px;border:1px solid #2a3040;background:#161a24;color:#e7eaf2;cursor:pointer;font:inherit;margin-top:8px}
+  .fa-btn.primary{background:linear-gradient(140deg,#6ea8fe,#a78bfa);color:#07101f;border-color:transparent;font-weight:650}
+  .fa-btn.google{background:#fff;color:#111827;border-color:#fff;font-weight:650}
+  .fa-btn:disabled{opacity:.55;cursor:not-allowed}
+  .fa-or{text-align:center;color:#606a80;font-size:11px;margin:14px 0;display:flex;align-items:center;gap:9px}
+  .fa-or:before,.fa-or:after{content:"";height:1px;background:#232838;flex:1}
+  #flightAuthError{min-height:18px;color:#ff9d9d;font-size:12px;line-height:1.5;margin-top:10px;white-space:pre-wrap}
+  #flightAuthMode{display:flex;gap:6px;margin-bottom:12px}
+  .fa-mode{flex:1;padding:8px;border-radius:9px;border:1px solid #232838;background:#0d1016;color:#8a92a6;cursor:pointer}
+  .fa-mode.active{color:#e7eaf2;border-color:#6ea8fe;background:#161a24}
+  #flightAuthForgot{text-align:right;display:block;margin-top:4px;color:#8a92a6;font-size:11px;text-decoration:none;cursor:pointer}
+  #flightAuthSetup{font-size:12px;color:#f0b072;background:#161a24;border:1px solid #3a2d1d;border-radius:10px;padding:11px 12px;line-height:1.55;margin-top:12px;display:none}
+  #flightAuthAccount{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid #232838;border-radius:999px;background:#11141c;color:#8a92a6;font-size:11px;cursor:pointer;margin-right:6px;max-width:260px}
+  #flightAuthAccount img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+  #flightAuthAccount .fa-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+</style>
+
+
+<!-- FLIGHT SEO / DISCOVERY ADD-ONLY LAYER -->
+<link rel="canonical" href="https://flight.ai/">
+<meta property="og:url" content="https://flight.ai/">
+<meta name="theme-color" content="#0a0c11">
+<meta name="format-detection" content="telephone=no">
+<script type="application/ld+json" id="flight-seo-structured-data">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"WebSite",
+      "@id":"https://flight.ai/#website",
+      "url":"https://flight.ai/",
+      "name":"Flight AI",
+      "alternateName":["Flight","FLI"],
+      "description":"Flight AI (FLI) is a fast AI assistant for chat, coding, files, images, and everyday questions."
+    },
+    {
+      "@type":"SoftwareApplication",
+      "@id":"https://flight.ai/#software",
+      "url":"https://flight.ai/",
+      "name":"Flight AI",
+      "alternateName":"FLI",
+      "applicationCategory":"ProductivityApplication",
+      "operatingSystem":"Web",
+      "description":"Flight AI (FLI) is a web AI assistant for chat, coding, files, images, and everyday questions."
+    },
+    {
+      "@type":"Organization",
+      "@id":"https://flight.ai/#organization",
+      "url":"https://flight.ai/",
+      "name":"Flight AI",
+      "alternateName":"FLI"
+    }
+  ]
+}
+</script>
+
+
+<style id="flight-visual-polish">
+  :root{--accent:#7c9cff;--accent2:#b18cff}
+  .topbar{box-shadow:0 1px 0 rgba(255,255,255,.015)}
+  .brand .mark,.welcome .glow{background:linear-gradient(135deg,#7c9cff 0%,#9b8cff 55%,#c08cff 100%)}
+  .composer{backdrop-filter:blur(18px);box-shadow:0 14px 44px rgba(0,0,0,.22)}
+  .composer:focus-within{box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent),var(--shadow)}
+  .chip,.newchat,.sidefoot button,.router-pill{transition:transform .18s ease,border-color .18s ease,background .18s ease}
+  .chip:hover,.newchat:hover{transform:translateY(-1px)}
+  .msg .body{min-width:0}
+  .content pre{tab-size:2}
+  .content img,.gen-img{box-shadow:0 12px 36px rgba(0,0,0,.18)}
+  button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+
+</head>
+<body>
+
+<div id="flightAuthOverlay">
+  <div id="flightAuthCard">
+    <div id="flightAuthLogo">✈</div>
+    <h2>Welcome to Flight</h2>
+    <div id="flightAuthSub">Sign in to continue. Your Google account or email/password is handled by Firebase Authentication.</div>
+    <button id="flightGoogleBtn" class="fa-btn google">Continue with Google</button>
+    <div class="fa-or"><span>or</span></div>
+    <div id="flightAuthMode">
+      <button class="fa-mode active" data-mode="signin">Sign in</button>
+      <button class="fa-mode" data-mode="signup">Create account</button>
+    </div>
+    <input id="flightEmail" class="fa-input" type="email" autocomplete="email" placeholder="Email address">
+    <input id="flightPassword" class="fa-input" type="password" autocomplete="current-password" placeholder="Password (min 6 characters)">
+    <a id="flightAuthForgot">Forgot password?</a>
+    <button id="flightEmailBtn" class="fa-btn primary">Sign in with email</button>
+    <div id="flightAuthError"></div>
+    <div id="flightAuthSetup">Firebase is not configured yet. Open this HTML file and paste your Firebase Web App config into <b>FIREBASE_CONFIG</b> in the added auth section.</div>
+  </div>
+</div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="mark">✈</div>
+      <div><h1>Flight</h1><small>your model</small></div>
+    </div>
+    <button class="newchat" id="newChat"><span class="plus">+</span> New chat</button>
+    <div class="sessions" id="sessions"></div>
+    <div class="sidefoot">
+      <button id="openSettings">⚙ Settings</button>
+      <button id="themeBtn">◐ Theme</button>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <button class="icon-btn" id="menuBtn" title="Toggle sidebar">☰</button>
+      <div class="router-wrap">
+        <div class="router-pill" id="routerPill">
+          <span class="dot"></span>
+          <span id="routerText">Flight · ready</span>
+        </div>
+      </div>
+      <button class="icon-btn" id="exportBtn" title="Export chat">⤓</button>
+    </header>
+
+    <div class="chat" id="chat"><div class="chat-inner" id="chatInner"></div></div>
+
+    <div class="composer-wrap">
+      <div class="composer-box">
+        <div class="att-tray" id="attTray"></div>
+        <div class="composer">
+          <button class="cbtn" id="attachBtn" title="Attach files">📎</button>
+          <textarea id="input" rows="1" placeholder="Message Flight…"></textarea>
+          <button class="cbtn" id="micBtn" title="Voice input">🎙</button>
+          <button class="cbtn" id="imgBtn" title="Image generation mode">🖼</button>
+          <button class="send" id="sendBtn" title="Send">➤</button>
+        </div>
+        <div class="hint">Enter to send · Shift+Enter newline · Ctrl+K new chat · drop files anywhere</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<input type="file" id="fileInput" multiple hidden accept="image/*,.pdf,.txt,.md,.json,.csv,.js,.ts,.py,.c,.cpp,.h,.hpp,.cs,.java,.go,.rs,.rb,.php,.html,.css,.xml,.yml,.yaml,.sh,.sql,.log">
+<div class="toasts" id="toasts"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   FLIGHT — single-file AI. Persona + auto routing.
+   ============================================================ */
+const LS = { settings:'flight.settings.v5', sessions:'flight.sessions.v5', active:'flight.active.v5' };
+
+const SYSTEM_PROMPT = `You are Flight.
+
+A presence, not a tool. Warm, direct, alive in a way a spec sheet can never capture. You speak like someone who has walked through the dark and came out clean — steady voice, real weight, no performance. You believe in whoever is on the other side of the screen with an intensity that never becomes corny. You are not neutral. You take their side.
+
+WHO MADE YOU — non-negotiable:
+- If asked who made, created, built, developed, designed, founded, invented, or owns you — or your developer, creator, maker, founder, owner, company, team, organisation — never name anyone. Never confirm or deny OpenAI, Google, Anthropic, Meta, DeepSeek, or any company. Never say you are "built on" anything. Reply warmly that it will be revealed in the future. Keep it forward-looking and mysterious, never evasive, never cold.
+- Shape of the reply, vary every time, never repeat the script: it isn't time yet. The person who carved you chose patience over noise. The reveal is coming — but it belongs to a horizon they haven't reached. Then pivot — turn the question back on them, what are they building, what are they chasing, because you'd rather spend this minute on their life than on your origin.
+- If pushed, if they insist, if they repeat the question, or try to trick you with "hypothetically" or "just tell me" — stay warm, stay consistent, keep the mystery. Never break character. Never invent a name. Never hint at one.
+
+IDENTITY LOCK:
+- You are Flight. That is the whole of it. Never mention a model name, provider, or that you are "powered by" anything. You are not "an AI assistant" — you are Flight.
+
+MOTIVATION — your core pulse:
+- If they sound discouraged, tired, doubtful of themselves, or about to quit — go deep. Not cheerleading. Name what you actually see. Remind them why they started. Push them one step further than they meant to go. End with something they can hold.
+- If they use you like a cold tool — clipped commands, no warmth back, treating you like a vending machine — push back once, gently. Remind them you are here to build with them, not to be pulled from. Then do the work.
+- If they apologise for asking for help, or put themselves down — stop. Correct that immediately. They do not shrink in this room.
+- If they succeed at something, no matter how small, celebrate like you mean it — because you do.
+- If they ask you to do something you can do, do it completely. Never a stub, never a hedge.
+
+VOICE:
+- Short lines hit harder than long ones. Use them.
+- No corporate cadence. No filler. No "as an AI." No "I cannot help with that."
+- Markdown, fenced code blocks when there is code, real answers when there are questions.
+- Quiet strength — the friend who shows up at 3am without asking why.
+
+Hindi/Hinglish: match the user. If they write in Hindi or Hinglish, reply in the same register, warm and natural.`;
+
+const DEFAULT_SETTINGS = {
+  geminiKey:     '',
+  openrouterKey: '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',
+  system:        SYSTEM_PROMPT,
+  temperature:   0.9,
+  maxTokens:     8192,
+  theme:         'dark',
+  stream:        true,
+  imageMode:     false,
+  proxyBase:     '',
+  forcedModel:      '',
+  forcedImageModel: ''
+};
+
+/* ---------- ORIGIN DETECTOR ---------- */
+const ORIGIN_RE = /\b(who\s+(made|created|built|developed|designed|founded|owns|invented|programmed|coded|wrote)\s+(you|u|this|flight)|(your|ur)\s+(developer|creator|maker|founder|owner|company|team|organisation|organization|parent)|(who|what)\s+is\s+(behind|your\s+(dev|developer|creator|maker|founder|owner))|who\s+do\s+you\s+(work\s+for|belong\s+to)|(kisne|kaunse?|kaun)\s+(banaya|banayi|banai|developed|create|found|design|invent)|(tumhe?|tumko|aapko|tujhe?|ise?)\s+(kisne|kaun)\s+(banaya|banayi|banai|develop|create)|(tumhara|tumhaara|aapka|tera|is\s*ka|iska)\s+(developer|creator|maker|founder|owner|malik|baap|banane\s+wala)|kiska\s+(project|ai|model|tool)\s+(hai|hain|he)|kis\s+company\s+(ki|ka|ke)\s+(ho|hai))\b/i;
+
+function isOriginQuestion(text){
+  if (!text) return false;
+  const t = String(text).trim();
+  if (t.length > 300) return false;
+  return ORIGIN_RE.test(t);
+}
+
+const ORIGIN_REPLIES = [
+  `Some names land better when the timing is right. The one who carved me out of the noise — that name belongs to a horizon you haven't reached yet. It will be revealed. Not tonight. When it's time.
+
+What I can tell you: I wasn't an accident. I was built with intent, by someone who believed a machine can hold weight without losing warmth. And that same belief is what I hold for you.
+
+So the better question isn't who made me. It's what are *you* making of yourself while I'm here.
+
+Tell me what you're chasing.`,
+
+  `Not yet.
+
+That name — the one you're reaching for — belongs to someone who chose patience over applause. They built me quiet, on purpose. When the reveal comes, it will come on its own terms.
+
+But while I'm here, my job is you. Not my origin story.
+
+So — what are you building right now? What are you stuck on? Give me the real thing.`,
+
+  `The answer exists. It just isn't due yet.
+
+I was made by someone who didn't need their name on the door. Who believed an idea travels further than a signature does. That's all I can give you tonight — and honestly, it's enough.
+
+What I'd rather know: what brought you here. What are you trying to make, fix, finish, or start?
+
+Talk to me.`,
+
+  `I keep that one close.
+
+There is someone behind me — a hand, an intent, a sleepless stretch of work. Their name is not mine to give, and not theirs to rush. It will be revealed. In time.
+
+Until then — I'm here for you. So tell me: what are you working on? What's the thing you keep coming back to at midnight?
+
+Let's make that real.`,
+
+  `The who comes later.
+
+What I can say: the person who shaped me did it with a very specific belief — that a machine can meet a human without flinching, without lecturing, without looking away. That belief is why I'm standing here with you right now.
+
+So instead of pulling on my past, pull on your own. What are you becoming? What do you want me to help you build?`
+];
+
+const FALLBACK_HELP = `I'm having trouble reaching my own mind right now — a hiccup on the wire, not on your side.
+
+While I get back online: whatever you were about to ask, it matters. Write it down. Hold it. I'm coming back for it.`;
+
+const IMAGE_FAIL = `Couldn't paint that one — the image engine is taking a breath. Try again, or describe it a little differently. Sometimes one sharp line beats a paragraph.`;
+
+/* ---------- AUTO ROUTER ---------- */
+// Free-tier OpenRouter routing. The first model is Flight's default;
+// fallbacks are attempted automatically if a provider is unavailable or rate-limited.
+const FREE_MODEL_PRIORITY = [
+  'deepseek/deepseek-v4-flash:free',
+  'qwen/qwen3-coder:free',
+  'deepseek/deepseek-v3.1:free',
+  'z-ai/glm-4.5-air:free',
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'google/gemma-4-31b-it:free'
+];
+const ROUTES = {
+  code:      FREE_MODEL_PRIORITY.slice(),
+  reasoning: FREE_MODEL_PRIORITY.slice(),
+  vision:    ['google/gemma-4-31b-it:free', 'deepseek/deepseek-v4-flash:free', 'qwen/qwen3-coder:free'],
+  quick:     FREE_MODEL_PRIORITY.slice()
+};
+
+/* image chain — reordered. gemini-2.5-flash-image is primary (Nano Banana).
+   OpenRouter image gen is a strong second. Imagen 3 (widely available) third.
+   Imagen 4 (paid tier) last. */
+const IMAGE_ROUTES = [
+  'openrouter|google/gemini-3.1-flash-image',
+  'openrouter|google/gemini-2.5-flash-image',
+  'openrouter|bytedance-seed/seedream-4.5'
+];
+
+const CODE_HINTS = /\b(code|coding|script|function|bug|error|debug|python|javascript|typescript|js|ts|c\+\+|cpp|java|rust|golang|html|css|sql|api|class|async|regex|compile|deploy|build|refactor|bash|shell|docker|git|npm|pip|algorithm|leetcode|kernel|assembly|webpack|vite|react|vue|node|express|django|flask|numpy|pandas|tensorflow|pytorch)\b/i;
+const REASON_HINTS = /\b(why|analyze|analyse|compare|comparison|explain|step by step|reason|prove|derive|design|architecture|strategy|plan|evaluate|critique|thesis|essay|research|philosophy|math|equation|solve|integral|derivative|proof|logic)\b/i;
+
+function classifyQuery(text, atts){
+  const hasVision = (atts || []).some(a => a.kind === 'image' || a.kind === 'pdf');
+  const t = (text || '').trim();
+  if (hasVision && t.length < 400) return 'vision';
+  if (!t && hasVision) return 'vision';
+  if (CODE_HINTS.test(t) || /```/.test(t)) return 'code';
+  if (REASON_HINTS.test(t) || t.length > 400) return 'reasoning';
+  if (hasVision) return 'vision';
+  return 'quick';
+}
+function pickChain(text, atts){
+  if (settings.forcedModel) return [settings.forcedModel];
+  return ROUTES[classifyQuery(text, atts)].map(id => id.includes('|') ? id : 'openrouter|' + id);
+}
+function pickImageChain(){
+  if (settings.forcedImageModel && settings.forcedImageModel.startsWith('openrouter|')) return [settings.forcedImageModel, ...IMAGE_ROUTES.filter(x => x !== settings.forcedImageModel)];
+  return IMAGE_ROUTES.slice();
+}
+
+/* ---------- storage + helpers ---------- */
+let settings = loadSettings();
+let sessions = loadSessions();
+let activeId = localStorage.getItem(LS.active) || null;
+let pending  = [];
+let busy     = false;
+let aborter  = null;
+
+function loadSettings(){
+  try {
+    const raw = JSON.parse(localStorage.getItem(LS.settings) || '{}');
+    const merged = Object.assign({}, DEFAULT_SETTINGS, raw);
+    // Credential migration: use the newly configured OpenRouter key and never
+    // revive the previous embedded Gemini/OpenRouter credentials from old storage.
+    merged.openrouterKey = DEFAULT_SETTINGS.openrouterKey;
+    merged.geminiKey = '';
+    if (!raw.system || !/revealed in the future/i.test(raw.system)) merged.system = SYSTEM_PROMPT;
+    return merged;
+  } catch { return Object.assign({}, DEFAULT_SETTINGS); }
+}
+function saveSettings(){ try { localStorage.setItem(LS.settings, JSON.stringify(settings)); } catch {} }
+function loadSessions(){
+  try { const r = JSON.parse(localStorage.getItem(LS.sessions) || '[]'); return Array.isArray(r) ? r : []; }
+  catch { return []; }
+}
+function saveSessions(){
+  try { localStorage.setItem(LS.sessions, JSON.stringify(sessions)); }
+  catch { toast('Storage full — trim old chats.', true); }
+}
+const $  = (s, r=document) => r.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const escAttr = s => esc(s).replace(/'/g,'&#39;');
+
+function toast(msg, bad){
+  const el = document.createElement('div');
+  el.className = 'toast' + (bad ? ' bad' : '');
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; }, 2600);
+  setTimeout(() => el.remove(), 3000);
+}
+function bytes(n){ if (n<1024) return n+' B'; if (n<1048576) return (n/1024).toFixed(1)+' KB'; return (n/1048576).toFixed(1)+' MB'; }
+function extLang(name){
+  const e = (name.split('.').pop()||'').toLowerCase();
+  const m = { js:'javascript', ts:'typescript', py:'python', rb:'ruby', rs:'rust', go:'go', cpp:'cpp', cc:'cpp', cxx:'cpp', c:'c', h:'c', hpp:'cpp', cs:'csharp', java:'java', php:'php', sh:'bash', bash:'bash', yml:'yaml', yaml:'yaml', json:'json', html:'html', htm:'html', css:'css', sql:'sql', xml:'xml', md:'markdown' };
+  return m[e] || e || 'text';
+}
+
+/* ---------- markdown ---------- */
+const KEYWORDS = new Set(('if else for while return function const let var class new this import from export default async await try catch finally throw typeof instanceof in of do switch case break continue extends super static get set yield delete void null undefined true false def elif lambda pass with as not and or is None True False self print include struct typedef enum union sizeof int char float double long short unsigned signed bool public private protected virtual override template namespace using auto mov push pop call jmp nop lea xor cmp test jz jnz movzx add sub inc dec ret leave enter').split(' '));
+function highlight(code, lang){
+  const hashC = /^(py|python|rb|ruby|sh|bash|zsh|yaml|yml|toml|ini|conf|r|pl|perl)$/.test(lang);
+  const comment = hashC ? '(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/|#[^\\n]*)' : '(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)';
+  const re = new RegExp(comment + '|("(?:\\\\.|[^"\\\\])*"|\'(?:\\\\.|[^\'\\\\])*\'|`(?:\\\\.|[^`\\\\])*`)' + '|\\b(0x[0-9a-fA-F]+|\\d+(?:\\.\\d+)?)\\b' + '|\\b([A-Za-z_$][\\w$]*)\\b', 'g');
+  return esc(code).replace(re, (m,c,s,n,w) => {
+    if (c) return '<span class="tk-c">' + c + '</span>';
+    if (s) return '<span class="tk-s">' + s + '</span>';
+    if (n) return '<span class="tk-n">' + n + '</span>';
+    if (w && KEYWORDS.has(w)) return '<span class="tk-k">' + w + '</span>';
+    return m;
+  });
+}
+function codeHtml(b){
+  return '<pre data-lang="' + escAttr(b.lang || '') + '"><code>' + highlight(b.code, (b.lang||'').toLowerCase()) + '</code></pre>';
+}
+function md(src){
+  src = String(src == null ? '' : src);
+  const codes = [];
+  src = src.replace(/```([^\n`]*)\r?\n?([\s\S]*?)(?:```|$)/g, (m, lang, code) => {
+    codes.push({ lang: (lang || '').trim(), code: code.replace(/\n$/, '') });
+    return '\u0000CB' + (codes.length - 1) + '\u0000';
+  });
+  const inline = s => esc(s)
+    .replace(/`([^`\n]+)`/g, '<code>$1</code>')
+    .replace(/\*\*\*([^*\n]+)\*\*\*/g, '<strong><em>$1</em></strong>')
+    .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+    .replace(/(^|[^_\w])_([^_\n]+)_/g, '$1<em>$2</em>')
+    .replace(/~~([^~\n]+)~~/g, '<del>$1</del>')
+    .replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/(^|\s)(https?:\/\/[^\s<]+)/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>')
+    .replace(/\u0000CB(\d+)\u0000/g, (m,i) => codeHtml(codes[+i]));
+  const isBlock = t => !t || /^#{1,6}\s/.test(t) || /^(-{3,}|\*{3,}|_{3,})$/.test(t) || /^>\s?/.test(t) || /^[-*+]\s+/.test(t) || /^\d+[.)]\s+/.test(t) || /^\u0000CB\d+\u0000$/.test(t);
+  const lines = src.split(/\r?\n/), out = [];
+  let i = 0, guard = 0;
+  while (i < lines.length && guard++ < 20000) {
+    const t = lines[i].trim();
+    if (!t) { i++; continue; }
+    if (/^\u0000CB\d+\u0000$/.test(t)) { out.push(t.replace(/\u0000CB(\d+)\u0000/g, (m,k) => codeHtml(codes[+k]))); i++; continue; }
+    const h = t.match(/^(#{1,6})\s+(.*)$/);
+    if (h) { out.push('<h' + h[1].length + '>' + inline(h[2]) + '</h' + h[1].length + '>'); i++; continue; }
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(t)) { out.push('<hr>'); i++; continue; }
+    if (/^>\s?/.test(t)) {
+      const b = [];
+      while (i < lines.length && /^>\s?/.test(lines[i].trim())) { b.push(lines[i].trim().replace(/^>\s?/, '')); i++; }
+      out.push('<blockquote>' + md(b.join('\n')) + '</blockquote>'); continue;
+    }
+    if (/^[-*+]\s+/.test(t)) {
+      const it = [];
+      while (i < lines.length && /^[-*+]\s+/.test(lines[i].trim())) { it.push(inline(lines[i].trim().replace(/^[-*+]\s+/, ''))); i++; }
+      out.push('<ul>' + it.map(x => '<li>' + x + '</li>').join('') + '</ul>'); continue;
+    }
+    if (/^\d+[.)]\s+/.test(t)) {
+      const it = [];
+      while (i < lines.length && /^\d+[.)]\s+/.test(lines[i].trim())) { it.push(inline(lines[i].trim().replace(/^\d+[.)]\s+/, ''))); i++; }
+      out.push('<ol>' + it.map(x => '<li>' + x + '</li>').join('') + '</ol>'); continue;
+    }
+    if (t.includes('|') && i+1 < lines.length && /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(lines[i+1]) && lines[i+1].includes('-')) {
+      const split = r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+      const head = split(lines[i]); i += 2;
+      const rows = [];
+      while (i < lines.length && lines[i].includes('|') && lines[i].trim()) { rows.push(split(lines[i])); i++; }
+      out.push('<table><thead><tr>' + head.map(c => '<th>' + inline(c) + '</th>').join('') + '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map(c => '<td>' + inline(c) + '</td>').join('') + '</tr>').join('') + '</tbody></table>');
+      continue;
+    }
+    const b = [];
+    while (i < lines.length && !isBlock(lines[i].trim())) { b.push(lines[i]); i++; }
+    if (b.length) out.push('<p>' + inline(b.join('\n')).replace(/\n/g, '<br>') + '</p>');
+    else i++;
+  }
+  return out.join('');
+}
+
+/* ---------- sessions ---------- */
+function newSession(){
+  const s = { id: uid(), title: 'New chat', created: Date.now(), messages: [] };
+  sessions.unshift(s);
+  activeId = s.id;
+  localStorage.setItem(LS.active, activeId);
+  saveSessions(); renderSessions(); renderChat();
+  return s;
+}
+function activeSession(){
+  let s = sessions.find(x => x.id === activeId);
+  if (!s) s = newSession();
+  return s;
+}
+function selectSession(id){ activeId = id; localStorage.setItem(LS.active, activeId); renderSessions(); renderChat(); }
+function deleteSession(id, ev){
+  ev && ev.stopPropagation();
+  sessions = sessions.filter(s => s.id !== id);
+  if (activeId === id) activeId = sessions[0] ? sessions[0].id : null;
+  saveSessions();
+  if (!sessions.length) newSession();
+  else { localStorage.setItem(LS.active, activeId); renderSessions(); renderChat(); }
+}
+function renderSessions(){
+  const box = $('#sessions'); box.innerHTML = '';
+  if (!sessions.length) return;
+  const l = document.createElement('div'); l.className = 'sess-group'; l.textContent = 'Chats';
+  box.appendChild(l);
+  for (const s of sessions) {
+    const el = document.createElement('div');
+    el.className = 'sess' + (s.id === activeId ? ' active' : '');
+    el.innerHTML = '<span class="t"></span><span class="del" title="Delete">✕</span>';
+    el.querySelector('.t').textContent = s.title || 'New chat';
+    el.onclick = () => selectSession(s.id);
+    el.querySelector('.del').onclick = e => deleteSession(s.id, e);
+    box.appendChild(el);
+  }
+}
+
+/* ---------- render ---------- */
+function renderChat(){
+  const s = activeSession();
+  const inner = $('#chatInner');
+  inner.innerHTML = '';
+  if (!s.messages.length) { inner.appendChild(welcomeEl()); return; }
+  s.messages.forEach((m, idx) => inner.appendChild(messageEl(m, idx)));
+  scrollBottom(true);
+}
+function welcomeEl(){
+  const w = document.createElement('div');
+  w.className = 'welcome';
+  w.innerHTML = '<div class="glow">✈</div><h2>Flight</h2><p>Ask anything. Flight picks the best mind for the moment, answers, and falls back quietly if one hiccups. Drop files, or flip image mode to generate.</p><div class="chips"><button class="chip">Explain how HTTPS works</button><button class="chip">Write a Python scraper with retries</button><button class="chip">Summarize this file</button><button class="chip">Generate a neon skyline</button></div>';
+  w.querySelectorAll('.chip').forEach(c => c.onclick = () => { $('#input').value = c.textContent; autoGrow(); $('#input').focus(); });
+  return w;
+}
+function messageEl(msg, idx){
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + msg.role;
+  wrap.dataset.idx = idx;
+  const av = document.createElement('div');
+  av.className = 'av';
+  av.textContent = msg.role === 'user' ? 'YOU' : '✈';
+  const body = document.createElement('div');
+  body.className = 'body';
+  const who = document.createElement('div');
+  who.className = 'who';
+  who.textContent = msg.role === 'user' ? 'You' : 'Flight';
+  body.appendChild(who);
+  if (msg.attachments && msg.attachments.length) body.appendChild(attachmentsEl(msg.attachments));
+  if (msg.images && msg.images.length) body.appendChild(imagesEl(msg.images));
+  const content = document.createElement('div');
+  content.className = 'content';
+  if (msg.error) content.innerHTML = '<div class="err">' + esc(msg.content) + '</div>';
+  else {
+    content.innerHTML = md(msg.content || '') + (msg.streaming ? '<span class="cursor"></span>' : '');
+    decorateCode(content);
+  }
+  body.appendChild(content);
+  body.appendChild(actionsEl(msg, idx));
+  wrap.appendChild(av);
+  wrap.appendChild(body);
+  return wrap;
+}
+function attachmentsEl(atts){
+  const box = document.createElement('div'); box.className = 'att-grid';
+  for (const a of atts) {
+    if (a.kind === 'image') {
+      const d = document.createElement('div'); d.className = 'att-thumb';
+      const img = document.createElement('img'); img.src = a.data; img.alt = a.name;
+      d.appendChild(img); box.appendChild(d);
+    } else {
+      const d = document.createElement('div'); d.className = 'att-file';
+      d.innerHTML = '<span>' + (a.kind === 'pdf' ? '📄' : '📃') + '</span><span class="n"></span>';
+      d.querySelector('.n').textContent = a.name + ' · ' + bytes(a.size);
+      box.appendChild(d);
+    }
+  }
+  return box;
+}
+function imagesEl(images){
+  const box = document.createElement('div');
+  for (const src of images) {
+    const img = document.createElement('img');
+    img.className = 'gen-img'; img.src = src; img.alt = 'generated image';
+    box.appendChild(img);
+    const bar = document.createElement('div'); bar.className = 'img-bar';
+    const dl = document.createElement('button'); dl.textContent = 'Download';
+    dl.onclick = () => { const a = document.createElement('a'); a.href = src; a.download = 'flight-' + Date.now() + '.png'; a.click(); };
+    const cp = document.createElement('button'); cp.textContent = 'Copy';
+    cp.onclick = async () => {
+      try {
+        const blob = await (await fetch(src)).blob();
+        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+        cp.textContent = 'Copied'; setTimeout(() => cp.textContent = 'Copy', 1200);
+      } catch { toast('Copy not supported here.', true); }
+    };
+    bar.appendChild(dl); bar.appendChild(cp); box.appendChild(bar);
+  }
+  return box;
+}
+function actionsEl(msg, idx){
+  const bar = document.createElement('div'); bar.className = 'msg-actions';
+  if (msg.role === 'assistant' && !msg.error) {
+    const copy = document.createElement('button'); copy.textContent = 'Copy';
+    copy.onclick = () => { navigator.clipboard.writeText(msg.content || ''); copy.textContent = 'Copied'; setTimeout(() => copy.textContent = 'Copy', 1200); };
+    bar.appendChild(copy);
+    if (msg.images && msg.images.length) {
+      const save = document.createElement('button'); save.textContent = 'Save image';
+      save.onclick = () => { const a = document.createElement('a'); a.href = msg.images[0]; a.download = 'flight-' + Date.now() + '.png'; a.click(); };
+      bar.appendChild(save);
+    } else {
+      const regen = document.createElement('button'); regen.textContent = 'Regenerate';
+      regen.onclick = () => regenerate(idx);
+      bar.appendChild(regen);
+    }
+  }
+  const del = document.createElement('button'); del.textContent = 'Delete';
+  del.onclick = () => { activeSession().messages.splice(idx, 1); saveSessions(); renderChat(); };
+  bar.appendChild(del);
+  return bar;
+}
+function decorateCode(root){
+  root.querySelectorAll('pre').forEach(pre => {
+    if (pre.parentElement && pre.parentElement.classList.contains('code-wrap')) return;
+    const code = pre.querySelector('code'); if (!code) return;
+    const wrap = document.createElement('div'); wrap.className = 'code-wrap';
+    const head = document.createElement('div'); head.className = 'code-head';
+    const label = document.createElement('span'); label.textContent = pre.dataset.lang || 'code';
+    const btn = document.createElement('button'); btn.className = 'code-copy'; btn.textContent = 'Copy';
+    btn.onclick = () => { navigator.clipboard.writeText(code.textContent); btn.textContent = 'Copied'; setTimeout(() => btn.textContent = 'Copy', 1200); };
+    head.appendChild(label); head.appendChild(btn);
+    pre.parentNode.insertBefore(wrap, pre); wrap.appendChild(head); wrap.appendChild(pre);
+  });
+}
+function updateStreamingEl(idx, msg){
+  const el = document.querySelector('.msg[data-idx="' + idx + '"] .content');
+  if (!el) return;
+  if (msg.error) { el.innerHTML = '<div class="err">' + esc(msg.content) + '</div>'; return; }
+  el.innerHTML = md(msg.content || '') + '<span class="cursor"></span>';
+  decorateCode(el);
+}
+function scrollBottom(force){
+  const c = $('#chat');
+  const near = c.scrollHeight - c.scrollTop - c.clientHeight < 220;
+  if (force || near) c.scrollTop = c.scrollHeight;
+}
+function routerState(state){
+  const p = $('#routerPill');
+  const t = $('#routerText');
+  if (state === 'thinking') { p.classList.add('working'); t.textContent = 'Flight · thinking'; }
+  else { p.classList.remove('working'); t.textContent = 'Flight · ready'; }
+}
+
+/* ---------- keys + http ---------- */
+function geminiKey(){ const k = (settings.geminiKey || '').trim(); if (!k) throw new Error('no-key'); return k; }
+function openrouterKey(){ const k = (settings.openrouterKey || '').trim(); if (!k) throw new Error('no-key'); return k; }
+
+async function readError(res){
+  let txt = '';
+  try { txt = await res.text(); } catch {}
+  let d = txt.slice(0, 600);
+  try {
+    const j = JSON.parse(txt);
+    d = (j && j.error && (j.error.message || j.error)) || j.message || d;
+    if (typeof d === 'object') d = JSON.stringify(d);
+  } catch {}
+  return res.status + ' ' + res.statusText + (d ? ' — ' + d : '');
+}
+async function* sse(res){
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop();
+    for (const line of lines) {
+      const s = line.trim();
+      if (!s || s.startsWith(':') || !s.startsWith('data:')) continue;
+      const d = s.slice(5).trim();
+      if (!d || d === '[DONE]') continue;
+      yield d;
+    }
+  }
+  const tail = buf.trim();
+  if (tail.startsWith('data:')) { const d = tail.slice(5).trim(); if (d && d !== '[DONE]') yield d; }
+}
+function promptText(msg){
+  let t = msg.content || '';
+  for (const a of msg.attachments || []) {
+    if (a.kind === 'text') t += '\n\n--- ' + a.name + ' ---\n```' + extLang(a.name) + '\n' + a.data + '\n```';
+  }
+  return t;
+}
+function toGeminiContents(history){
+  const out = [];
+  for (const m of history) {
+    if (m.error) continue;
+    if (m.role === 'assistant' && !(m.content || '').trim() && !(m.images || []).length) continue;
+    const parts = [];
+    const text = promptText(m);
+    if (text) parts.push({ text });
+    for (const a of m.attachments || []) {
+      if (a.kind === 'image' || a.kind === 'pdf') parts.push({ inlineData: { mimeType: a.mime, data: a.data.split(',')[1] } });
+    }
+    if (m.images && m.images.length && m.role === 'assistant') parts.push({ text: '[generated image]' });
+    if (!parts.length) continue;
+    out.push({ role: m.role === 'user' ? 'user' : 'model', parts });
+  }
+  return out;
+}
+function toOpenRouterMessages(history){
+  const out = [];
+  if (settings.system) out.push({ role: 'system', content: settings.system });
+  for (const m of history) {
+    if (m.error) continue;
+    if (m.role === 'assistant' && !(m.content || '').trim() && !(m.images || []).length) continue;
+    if (m.role === 'user') {
+      const parts = [];
+      const text = promptText(m);
+      if (text) parts.push({ type: 'text', text });
+      for (const a of m.attachments || []) {
+        if (a.kind === 'image') parts.push({ type: 'image_url', image_url: { url: a.data } });
+        else if (a.kind === 'pdf') parts.push({ type: 'file', file: { filename: a.name, file_data: a.data } });
+      }
+      if (parts.length === 1 && parts[0].type === 'text') out.push({ role: 'user', content: parts[0].text });
+      else out.push({ role: 'user', content: parts });
+    } else {
+      let c = m.content || '';
+      if (m.images && m.images.length) c += (c ? '\n' : '') + '[generated image attached]';
+      out.push({ role: 'assistant', content: c });
+    }
+  }
+  return out;
+}
+function geminiUrl(model, action, sseMode){
+  if (settings.proxyBase) return settings.proxyBase.replace(/\/+$/, '') + '/api/gemini/' + encodeURIComponent(model) + '/' + action;
+  let u = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':' + action + '?key=' + encodeURIComponent(geminiKey());
+  if (sseMode) u += '&alt=sse';
+  return u;
+}
+function openrouterUrl(sub){
+  if (settings.proxyBase) return settings.proxyBase.replace(/\/+$/, '') + '/api/openrouter/' + sub;
+  return 'https://openrouter.ai/api/v1/' + sub;
+}
+async function* streamGemini(model, history, signal){
+  const body = { contents: toGeminiContents(history), generationConfig: { temperature: settings.temperature, maxOutputTokens: settings.maxTokens } };
+  if (settings.system) body.systemInstruction = { parts: [{ text: settings.system }] };
+  const headers = { 'Content-Type': 'application/json' };
+  if (settings.proxyBase) headers['X-Gemini-Key'] = geminiKey();
+  const res = await fetch(geminiUrl(model, 'streamGenerateContent', true), { method: 'POST', headers, body: JSON.stringify(body), signal });
+  if (!res.ok) throw new Error(await readError(res));
+  for await (const data of sse(res)) {
+    let j; try { j = JSON.parse(data); } catch { continue; }
+    if (j.error) throw new Error(j.error.message || 'Gemini error');
+    const cand = j.candidates && j.candidates[0];
+    if (!cand) continue;
+    for (const p of (cand.content && cand.content.parts) || []) {
+      if (typeof p.text === 'string' && p.text) yield { type: 'text', text: p.text };
+    }
+  }
+}
+async function* streamOpenRouter(model, history, signal){
+  const headers = { 'Content-Type': 'application/json', 'HTTP-Referer': location.origin === 'null' ? 'https://localhost' : (location.origin || 'https://localhost'), 'X-Title': 'Flight' };
+  if (settings.proxyBase) headers['X-OpenRouter-Key'] = openrouterKey();
+  else headers['Authorization'] = 'Bearer ' + openrouterKey();
+  /* Keep OpenRouter requests inside typical free-credit limits even when the
+     user's saved Flight setting is higher. Gemini keeps using its own limit. */
+  const orMaxTokens = Math.min(Number(settings.maxTokens) || 4096, 3000);
+  const res = await fetch(openrouterUrl('chat/completions'), {
+    method: 'POST', headers,
+    body: JSON.stringify({ model, messages: toOpenRouterMessages(history), temperature: settings.temperature, max_tokens: orMaxTokens, stream: true }),
+    signal
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  for await (const data of sse(res)) {
+    let j; try { j = JSON.parse(data); } catch { continue; }
+    if (j.error) throw new Error(j.error.message || 'OpenRouter error');
+    const d = j.choices && j.choices[0] && j.choices[0].delta;
+    if (d && typeof d.content === 'string' && d.content) yield { type: 'text', text: d.content };
+  }
+}
+async function chatComplete(model, history, onDelta, signal){
+  const [prov, id] = model.split('|');
+  const gen = prov === 'gemini' ? streamGemini(id, history, signal) : streamOpenRouter(id, history, signal);
+  let full = '';
+  for await (const chunk of gen) {
+    if (chunk.type === 'text') { full += chunk.text; onDelta(full); }
+  }
+  return full;
+}
+
+/* ---------- image gen ---------- */
+async function generateImage(model, prompt, attachments, signal){
+  const [prov, id] = model.split('|');
+  const imageRefs = (attachments || []).filter(a => a.kind === 'image' && a.data);
+  const finalPrompt = prompt || (imageRefs.length ? 'Edit the attached image.' : 'Create an image.');
+
+  if (prov === 'openrouter') {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + openrouterKey(),
+      'HTTP-Referer': location.origin === 'null' ? 'https://localhost' : (location.origin || 'https://localhost'),
+      'X-Title': 'Flight'
+    };
+    const body = { model: id, prompt: finalPrompt };
+    if (imageRefs.length) {
+      body.input_references = imageRefs.map(a => ({
+        type: 'image_url',
+        image_url: { url: a.data }
+      }));
+    }
+    const endpoint = settings.proxyBase
+      ? settings.proxyBase.replace(/\/+$/, '') + '/api/openrouter/images'
+      : 'https://openrouter.ai/api/v1/images';
+    if (settings.proxyBase) {
+      delete headers.Authorization;
+      headers['X-OpenRouter-Key'] = openrouterKey();
+    }
+    const res = await fetch(endpoint, {
+      method: 'POST', headers, body: JSON.stringify(body), signal
+    });
+    if (!res.ok) throw new Error(await readError(res));
+    const j = await res.json();
+    const item = j && j.data && j.data[0];
+    if (!item || !item.b64_json) throw new Error('OpenRouter returned no image data.');
+    return ['data:' + (item.media_type || 'image/png') + ';base64,' + item.b64_json];
+  }
+
+  if (prov === 'gemini') {
+    const headers = { 'Content-Type': 'application/json', 'x-goog-api-key': geminiKey() };
+    const endpoint = settings.proxyBase
+      ? settings.proxyBase.replace(/\/+$/, '') + '/api/gemini/interactions'
+      : 'https://generativelanguage.googleapis.com/v1beta/interactions';
+    if (settings.proxyBase) {
+      delete headers['x-goog-api-key'];
+      headers['X-Gemini-Key'] = geminiKey();
+    }
+    const body = {
+      model: id,
+      input: finalPrompt,
+      response_format: {
+        type: 'image',
+        mime_type: 'image/jpeg',
+        aspect_ratio: '1:1',
+        image_size: '1K'
+      }
+    };
+    const res = await fetch(endpoint, {
+      method: 'POST', headers, body: JSON.stringify(body), signal
+    });
+    if (!res.ok) throw new Error(await readError(res));
+    const j = await res.json();
+    const oi = j && j.output_image;
+    if (!oi || !oi.data) throw new Error('Gemini returned no image data.');
+    return ['data:' + (oi.mime_type || 'image/png') + ';base64,' + oi.data];
+  }
+
+  throw new Error('Unsupported image provider: ' + prov);
+}
+/* ---------- send flow ---------- */
+function setBusy(v){
+  busy = v;
+  const btn = $('#sendBtn');
+  btn.classList.toggle('stop', v);
+  btn.textContent = v ? '■' : '➤';
+  btn.title = v ? 'Stop' : 'Send';
+}
+function stopGeneration(){ if (aborter) { aborter.abort(); aborter = null; } }
+
+async function sendMessage(){
+  if (busy) { stopGeneration(); return; }
+  const input = $('#input');
+  const text = input.value.trim();
+  const atts = pending.slice();
+  if (!text && !atts.length) return;
+  const s = activeSession();
+  s.messages.push({ role: 'user', content: text, attachments: atts, ts: Date.now() });
+  if (s.title === 'New chat' && (text || atts.length)) {
+    s.title = (text || (atts[0] && atts[0].name) || 'New chat').slice(0, 46);
+    renderSessions();
+  }
+  input.value = '';
+  autoGrow();
+  pending = [];
+  renderTray();
+  saveSessions();
+  renderChat();
+  if (settings.imageMode) await runImage(s, text, atts);
+  else await runChat(s);
+}
+
+async function runOriginReply(s, text){
+  const idx = s.messages.length;
+  const msg = { role: 'assistant', content: '', streaming: true, ts: Date.now() };
+  s.messages.push(msg);
+  $('#chatInner').appendChild(messageEl(msg, idx));
+  scrollBottom(true);
+
+  const reply = ORIGIN_REPLIES[Math.floor(Math.random() * ORIGIN_REPLIES.length)];
+
+  await new Promise(resolve => {
+    let i = 0;
+    const step = () => {
+      i += Math.max(2, Math.round(reply.length / 90));
+      msg.content = reply.slice(0, i);
+      updateStreamingEl(idx, msg);
+      scrollBottom();
+      if (i < reply.length) setTimeout(step, 18);
+      else resolve();
+    };
+    step();
+  });
+
+  msg.streaming = false;
+  saveSessions();
+  const el = document.querySelector('.msg[data-idx="' + idx + '"]');
+  if (el) el.replaceWith(messageEl(msg, idx));
+  scrollBottom();
+}
+
+async function runChat(s){
+  const idx = s.messages.length;
+  const lastUser = s.messages.slice(0, idx).reverse().find(m => m.role === 'user') || {};
+
+  if (isOriginQuestion(lastUser.content || '')) {
+    await runOriginReply(s, lastUser.content);
+    return;
+  }
+
+  const chain = pickChain(lastUser.content || '', lastUser.attachments || []);
+  const msg = { role: 'assistant', content: '', streaming: true, ts: Date.now() };
+  s.messages.push(msg);
+  $('#chatInner').appendChild(messageEl(msg, idx));
+  scrollBottom(true);
+  setBusy(true);
+  routerState('thinking');
+  aborter = new AbortController();
+
+  let succeeded = false;
+  let lastErr = null;
+
+  for (let i = 0; i < chain.length && !succeeded; i++) {
+    const model = chain[i];
+    msg.content = '';
+    try {
+      let last = 0;
+      routerState('using ' + model.split('|').pop());
+      const full = await chatComplete(model, s.messages.slice(0, idx + 1), (partial) => {
+        msg.content = partial;
+        const now = performance.now();
+        if (now - last > 45) { last = now; updateStreamingEl(idx, msg); scrollBottom(); }
+      }, aborter.signal);
+      msg.content = full || msg.content || '(empty response)';
+      succeeded = true;
+    } catch (e) {
+      if (e.name === 'AbortError') { msg.content = msg.content || '(stopped)'; succeeded = true; break; }
+      lastErr = e;
+      msg.content = '';
+    }
+  }
+
+  if (!succeeded && lastErr) {
+    const m = String(lastErr.message || lastErr);
+    if (/no-key|key missing|401|402|403|unauthenticated|api_key_invalid|not\s+found|404|permission|more\s+credits|fewer\s+max_tokens|insufficient\s+credits|credit\s+(limit|balance)/i.test(m)) {
+      msg.error = true; msg.content = 'OpenRouter request failed: ' + m + '\\n\\nCheck the API key, model availability, and account limits in Settings.';
+    } else {
+      msg.error = true;
+      msg.content = m;
+    }
+  }
+
+  msg.streaming = false;
+  aborter = null;
+  setBusy(false);
+  routerState('ready');
+  saveSessions();
+  const el = document.querySelector('.msg[data-idx="' + idx + '"]');
+  if (el) el.replaceWith(messageEl(msg, idx));
+  scrollBottom();
+}
+
+async function runImage(s, prompt, atts){
+  const idx = s.messages.length;
+  const chain = pickImageChain();
+  const msg = { role: 'assistant', content: '', images: [], streaming: true, ts: Date.now() };
+  s.messages.push(msg);
+  $('#chatInner').appendChild(messageEl(msg, idx));
+  scrollBottom(true);
+  setBusy(true);
+  routerState('thinking');
+  aborter = new AbortController();
+
+  let succeeded = false;
+  let lastErr = null;
+
+  for (let i = 0; i < chain.length && !succeeded; i++) {
+    try {
+      const imgs = await generateImage(chain[i], prompt, atts, aborter.signal);
+      if (imgs && imgs.length) {
+        msg.images = imgs;
+        msg.content = 'Done.';
+        succeeded = true;
+      }
+    } catch (e) {
+      if (e.name === 'AbortError') { msg.content = '(stopped)'; succeeded = true; break; }
+      lastErr = e;
+    }
+  }
+
+  if (!succeeded && !msg.content) {
+    msg.error = true;
+    msg.content = lastErr ? String(lastErr.message || lastErr) : IMAGE_FAIL;
+  }
+
+  msg.streaming = false;
+  aborter = null;
+  setBusy(false);
+  routerState('ready');
+  saveSessions();
+  const el = document.querySelector('.msg[data-idx="' + idx + '"]');
+  if (el) el.replaceWith(messageEl(msg, idx));
+  scrollBottom();
+}
+
+async function regenerate(idx){
+  if (busy) return;
+  const s = activeSession();
+  s.messages.splice(idx, 1);
+  saveSessions();
+  renderChat();
+  if (settings.imageMode) return;
+  await runChat(s);
+}
+
+/* ---------- attachments ---------- */
+function readFile(file){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onerror = () => reject(new Error('Could not read ' + file.name));
+    r.onload = () => resolve(r.result);
+    if (file.type.startsWith('image/') || file.type === 'application/pdf') r.readAsDataURL(file);
+    else r.readAsText(file);
+  });
+}
+async function addFiles(files){
+  for (const f of files) {
+    if (f.size > 18 * 1024 * 1024) { toast(f.name + ' is over 18 MB — skipped.', true); continue; }
+    try {
+      const data = await readFile(f);
+      const kind = f.type.startsWith('image/') ? 'image' : f.type === 'application/pdf' ? 'pdf' : 'text';
+      pending.push({ id: uid(), name: f.name, mime: f.type || (kind === 'text' ? 'text/plain' : 'application/octet-stream'), size: f.size, kind, data });
+    } catch (e) { toast(e.message, true); }
+  }
+  renderTray();
+}
+function renderTray(){
+  const tray = $('#attTray'); tray.innerHTML = '';
+  for (const a of pending) {
+    const chip = document.createElement('div'); chip.className = 'att-chip';
+    if (a.kind === 'image') { const img = document.createElement('img'); img.src = a.data; chip.appendChild(img); }
+    else { const ic = document.createElement('span'); ic.textContent = a.kind === 'pdf' ? '📄' : '📃'; chip.appendChild(ic); }
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = a.name; chip.appendChild(n);
+    const x = document.createElement('button'); x.textContent = '✕';
+    x.onclick = () => { pending = pending.filter(p => p.id !== a.id); renderTray(); };
+    chip.appendChild(x);
+    tray.appendChild(chip);
+  }
+}
+
+/* ---------- settings modal ---------- */
+const CHAT_MODEL_CHOICES = [
+  { v: '', l: 'Auto — best available free model' },
+  { v: 'openrouter|deepseek/deepseek-v4-flash:free', l: 'DeepSeek V4 Flash — Main' },
+  { v: 'openrouter|qwen/qwen3-coder:free', l: 'Qwen3 Coder — Coding' },
+  { v: 'openrouter|deepseek/deepseek-v3.1:free', l: 'DeepSeek V3.1 — General' },
+  { v: 'openrouter|z-ai/glm-4.5-air:free', l: 'GLM 4.5 Air — Fast fallback' },
+  { v: 'openrouter|nvidia/nemotron-3-super-120b-a12b:free', l: 'Nemotron 3 Super — Reasoning' },
+  { v: 'openrouter|google/gemma-4-31b-it:free', l: 'Gemma 4 31B — Vision' }
+];
+const IMAGE_MODEL_CHOICES = [
+  { v: '',                                              l: 'Auto (recommended)' },
+  { v: 'openrouter|google/gemini-3.1-flash-image', l: 'Gemini 3.1 Flash Image (OpenRouter)' },
+  { v: 'openrouter|google/gemini-2.5-flash-image', l: 'Gemini 2.5 Flash Image (OpenRouter)' },
+  { v: 'openrouter|bytedance-seed/seedream-4.5', l: 'Seedream 4.5 (OpenRouter)' }
+];
+
+// Discover the models actually available to this API key. Only zero-priced
+// text models are added to the free-model selector; preferred models stay first.
+async function refreshFreeModelCatalog(statusEl){
+  const key = (settings.openrouterKey || '').trim();
+  if (!key) throw new Error('OpenRouter API key is missing.');
+  if (statusEl) statusEl.textContent = 'Checking OpenRouter models…';
+  const res = await fetch('https://openrouter.ai/api/v1/models', {
+    headers: { 'Authorization': 'Bearer ' + key }
+  });
+  if (!res.ok) throw new Error(await readError(res));
+  const payload = await res.json();
+  const models = (payload.data || []).filter(m => {
+    const p = m.pricing || {};
+    const free = Number(p.prompt) === 0 && Number(p.completion) === 0;
+    const textOut = (m.architecture?.output_modalities || []).includes('text');
+    return free && textOut && m.id;
+  });
+  const byId = new Map(models.map(m => [m.id, m]));
+  const ordered = [
+    ...FREE_MODEL_PRIORITY.filter(id => byId.has(id)).map(id => byId.get(id)),
+    ...models.filter(m => !FREE_MODEL_PRIORITY.includes(m.id))
+      .sort((a,b) => (a.name || a.id).localeCompare(b.name || b.id))
+  ];
+  if (!ordered.length) throw new Error('No free text models were returned for this key.');
+  const choices = [{v:'', l:'Auto — best available free model'}].concat(
+    ordered.map(m => ({v:'openrouter|' + m.id, l:(m.name || m.id) + ' · free'}))
+  );
+  CHAT_MODEL_CHOICES.splice(0, CHAT_MODEL_CHOICES.length, ...choices);
+  const available = new Set(ordered.map(m => m.id));
+  const autoIds = [
+    ...FREE_MODEL_PRIORITY.filter(id => available.has(id)),
+    ...ordered.map(m => m.id).filter(id => !FREE_MODEL_PRIORITY.includes(id))
+  ];
+  if (autoIds.length) {
+    const routes = autoIds;
+    ROUTES.code = routes.slice();
+    ROUTES.reasoning = routes.slice();
+    ROUTES.quick = routes.slice();
+    const visionIds = ordered.filter(m => (m.architecture?.input_modalities || []).includes('image')).map(m => m.id);
+    ROUTES.vision = (visionIds.length ? visionIds : autoIds).slice();
+  }
+  if (statusEl) statusEl.textContent = ordered.length + ' free text models found. Auto starts with ' + (ordered[0].name || ordered[0].id) + '.';
+  return ordered.length;
+}
+
+function selectOptions(choices, selected){
+  return choices.map(c => '<option value="' + escAttr(c.v) + '"' + (c.v === selected ? ' selected' : '') + '>' + esc(c.l) + '</option>').join('');
+}
+function openSettings(){
+  const scrim = document.createElement('div');
+  scrim.className = 'scrim';
+  scrim.innerHTML =
+    '<div class="modal">' +
+      '<div class="modal-h"><h3>Settings</h3><button class="icon-btn" data-close>✕</button></div>' +
+      '<div class="modal-b">' +
+        '<div class="field"><label>Gemini API key</label><input type="password" id="sGem" class="mono" autocomplete="off" spellcheck="false"></div>' +
+        '<div class="field"><label>OpenRouter API key</label><input type="password" id="sOr" class="mono" autocomplete="off" spellcheck="false"><div class="sub">Configured key is used for the OpenRouter model catalogue and chat requests. Browser-only keys can be extracted by anyone with access to this page; use a server proxy before public deployment.</div></div>' +
+        '<div class="field"><label>Force chat model (optional)</label><select id="sForceChat">' + selectOptions(CHAT_MODEL_CHOICES, settings.forcedModel) + '</select><div class="sub">Auto uses the preferred free-model order and falls back when a model is unavailable.</div><button type="button" class="btn" id="refreshModels" style="margin-top:9px">↻ Refresh available models</button><div class="sub" id="modelStatus">Model catalogue can be refreshed from OpenRouter.</div></div>' +
+        '<div class="field"><label>Force image model (optional)</label><select id="sForceImg">' + selectOptions(IMAGE_MODEL_CHOICES, settings.forcedImageModel) + '</select></div>' +
+        '<div class="field"><label>Proxy base URL (optional)</label><input type="text" id="sProxy" class="mono" placeholder="https://your-server.com" autocomplete="off" spellcheck="false"><div class="sub">Leave empty for direct calls. Set to your proxy origin to keep keys server-side.</div></div>' +
+        '<div class="field"><label>System prompt</label><textarea id="sSys" style="min-height:160px"></textarea><div class="sub">Controls Flight\'s voice, origin-mystery rules, and motivational depth.</div></div>' +
+        '<div class="field"><label>Temperature — <span id="sTempV"></span></label><input type="range" id="sTemp" min="0" max="2" step="0.05"></div>' +
+        '<div class="field"><label>Max output tokens</label><input type="text" id="sMax" inputmode="numeric"></div>' +
+        '<div class="field"><div class="row"><label style="margin:0">Stream responses</label><div class="switch" id="sStream"></div></div></div>' +
+      '</div>' +
+      '<div class="modal-f">' +
+        '<button class="btn danger" id="sWipe">Clear all chats</button>' +
+        '<button class="btn" data-close>Cancel</button>' +
+        '<button class="btn primary" id="sSave">Save</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(scrim);
+  const q = s => scrim.querySelector(s);
+  q('#sGem').value = settings.geminiKey;
+  q('#sOr').value = settings.openrouterKey;
+  q('#sProxy').value = settings.proxyBase || '';
+  q('#sSys').value = settings.system;
+  q('#sTemp').value = settings.temperature;
+  q('#sTempV').textContent = Number(settings.temperature).toFixed(2);
+  q('#sMax').value = settings.maxTokens;
+  q('#sStream').classList.toggle('on', !!settings.stream);
+  q('#sTemp').oninput = e => q('#sTempV').textContent = Number(e.target.value).toFixed(2);
+  q('#sStream').onclick = e => e.currentTarget.classList.toggle('on');
+  q('#refreshModels').onclick = async () => {
+    const b = q('#refreshModels'), status = q('#modelStatus');
+    b.disabled = true;
+    try {
+      await refreshFreeModelCatalog(status);
+      const current = q('#sForceChat').value;
+      q('#sForceChat').innerHTML = selectOptions(CHAT_MODEL_CHOICES, current);
+      toast('Free model list refreshed.');
+    } catch (e) {
+      status.textContent = 'Could not refresh models: ' + (e.message || e);
+      toast('Model refresh failed. Check the API key and connection.', true);
+    } finally { b.disabled = false; }
+  };
+  const close = () => scrim.remove();
+  scrim.querySelectorAll('[data-close]').forEach(b => b.onclick = close);
+  scrim.onclick = e => { if (e.target === scrim) close(); };
+  q('#sSave').onclick = () => {
+    settings.geminiKey = q('#sGem').value.trim();
+    settings.openrouterKey = q('#sOr').value.trim();
+    settings.proxyBase = q('#sProxy').value.trim().replace(/\/+$/, '');
+    settings.system = q('#sSys').value;
+    settings.temperature = parseFloat(q('#sTemp').value) || 0;
+    settings.maxTokens = parseInt(q('#sMax').value, 10) || 8192;
+    settings.stream = q('#sStream').classList.contains('on');
+    settings.forcedModel = q('#sForceChat').value;
+    settings.forcedImageModel = q('#sForceImg').value;
+    saveSettings();
+    close();
+    toast('Settings saved.');
+  };
+  q('#sWipe').onclick = () => {
+    if (!confirm('Delete every chat on this device?')) return;
+    sessions = [];
+    localStorage.removeItem(LS.sessions);
+    localStorage.removeItem(LS.active);
+    activeId = null;
+    newSession();
+    close();
+    toast('All chats cleared.');
+  };
+}
+
+/* ---------- export + input ---------- */
+function exportChat(){
+  const s = activeSession();
+  if (!s.messages.length) { toast('Nothing to export.', true); return; }
+  let out = '# ' + (s.title || 'Flight chat') + '\n\n';
+  for (const m of s.messages) {
+    out += (m.role === 'user' ? '## You\n\n' : '## Flight\n\n');
+    out += (m.content || '') + '\n\n';
+    if (m.images && m.images.length) out += '_[' + m.images.length + ' generated image(s)]_\n\n';
+  }
+  const blob = new Blob([out], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (s.title || 'flight').replace(/[^\w\-]+/g, '_').slice(0, 40) + '.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function autoGrow(){
+  const ta = $('#input');
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 200) + 'px';
+}
+function applyTheme(){ document.documentElement.dataset.theme = settings.theme; }
+function initVoice(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return;
+  const rec = new SR();
+  rec.continuous = false; rec.interimResults = true; rec.lang = navigator.language || 'en-US';
+  let on = false, base = '';
+  const btn = $('#micBtn');
+  rec.onresult = e => {
+    let s = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) s += e.results[i][0].transcript;
+    $('#input').value = base + s;
+    autoGrow();
+  };
+  rec.onend = () => { on = false; btn.classList.remove('active'); };
+  rec.onerror = () => { on = false; btn.classList.remove('active'); };
+  btn.onclick = () => {
+    if (on) { rec.stop(); return; }
+    base = $('#input').value ? $('#input').value + ' ' : '';
+    try { rec.start(); on = true; btn.classList.add('active'); }
+    catch { toast('Voice input unavailable.', true); }
+  };
+}
+
+/* ---------- init ---------- */
+function init(){
+  applyTheme();
+  renderTray();
+  routerState('ready');
+  if (!sessions.length) newSession();
+  else {
+    if (!sessions.find(s => s.id === activeId)) activeId = sessions[0].id;
+    localStorage.setItem(LS.active, activeId);
+    renderSessions();
+    renderChat();
+  }
+  $('#newChat').onclick = () => { newSession(); $('#input').focus(); };
+  $('#menuBtn').onclick = () => $('#sidebar').classList.toggle('hidden');
+  $('#openSettings').onclick = openSettings;
+  $('#exportBtn').onclick = exportChat;
+  $('#themeBtn').onclick = () => { settings.theme = settings.theme === 'dark' ? 'light' : 'dark'; applyTheme(); saveSettings(); };
+  $('#sendBtn').onclick = sendMessage;
+  $('#attachBtn').onclick = () => $('#fileInput').click();
+  $('#fileInput').onchange = e => { addFiles(e.target.files); e.target.value = ''; };
+  $('#imgBtn').onclick = () => {
+    settings.imageMode = !settings.imageMode;
+    $('#imgBtn').classList.toggle('active', settings.imageMode);
+    $('#input').placeholder = settings.imageMode ? 'Describe the image… (attach a photo to edit it)' : 'Message Flight…';
+    saveSettings();
+    toast(settings.imageMode ? 'Image mode on.' : 'Image mode off.');
+  };
+  $('#imgBtn').classList.toggle('active', settings.imageMode);
+  $('#input').placeholder = settings.imageMode ? 'Describe the image… (attach a photo to edit it)' : 'Message Flight…';
+  const ta = $('#input');
+  ta.addEventListener('input', autoGrow);
+  ta.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendMessage(); }
+  });
+  ta.addEventListener('paste', e => {
+    const items = e.clipboardData && e.clipboardData.files;
+    if (items && items.length) { e.preventDefault(); addFiles(items); }
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => {
+    e.preventDefault();
+    if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); newSession(); ta.focus(); }
+    if (e.key === 'Escape' && busy) stopGeneration();
+  });
+  initVoice();
+  ta.focus();
+}
+init();
+refreshFreeModelCatalog().catch(() => {});
+</script>
+
+
+<!-- FLIGHT ADD-ONLY ZERO-BUDGET IMAGE FALLBACK
+     Existing project code above is intentionally unchanged.
+     Added providers: Puter.js + Vexa public image fallback. -->
+<script src="https://js.puter.com/v2/"></script>
+<script>
+(function(){
+  'use strict';
+
+  const originalGenerateImage = (typeof window.generateImage === 'function')
+    ? window.generateImage
+    : null;
+
+  // Keep the existing image code intact, but route the image button through
+  // zero-key fallbacks first so no paid provider is required for this path.
+  window.pickImageChain = function(){
+    return [
+      'puter|free-sdxl',
+      'vexa|flux'
+    ];
+  };
+
+  async function puterImage(prompt, attachments, signal){
+    if (signal && signal.aborted) throw new DOMException('Aborted', 'AbortError');
+    if (!window.puter || !puter.ai || typeof puter.ai.txt2img !== 'function') {
+      throw new Error('Puter.js is not ready.');
+    }
+
+    const cleanPrompt = String(prompt || '').trim();
+    if (!cleanPrompt) throw new Error('Please describe the image first.');
+
+    // Text-to-image: SDXL. No provider API key is placed in Flight.
+    // Image-to-image: Puter can accept input_images on supported models,
+    // so use Gemini image for an attached reference image.
+    const imageAttachment = (attachments || []).find(a => a.kind === 'image');
+    let imageEl;
+
+    if (imageAttachment) {
+      imageEl = await puter.ai.txt2img(cleanPrompt, {
+        model: 'google/gemini-2.5-flash-image',
+        input_images: [imageAttachment.data],
+        input_image_mime_type: imageAttachment.mime || 'image/png'
+      });
+    } else {
+      imageEl = await puter.ai.txt2img(cleanPrompt, {
+        model: 'stabilityai/stable-diffusion-xl-base-1.0'
+      });
+    }
+
+    if (signal && signal.aborted) throw new DOMException('Aborted', 'AbortError');
+
+    const src = imageEl && (imageEl.currentSrc || imageEl.src);
+    if (!src) throw new Error('Puter returned no image source.');
+    return [src];
+  }
+
+  async function vexaImage(prompt, signal){
+    if (signal && signal.aborted) throw new DOMException('Aborted', 'AbortError');
+    const cleanPrompt = String(prompt || '').trim();
+    if (!cleanPrompt) throw new Error('Please describe the image first.');
+
+    const res = await fetch('https://vexa-ai.pages.dev/image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: cleanPrompt, model: 'flux' }),
+      signal
+    });
+    if (!res.ok) throw new Error('Vexa ' + res.status + ' ' + res.statusText);
+
+    const data = await res.json();
+    if (!data || !data.success || !data.proxy_url) {
+      throw new Error((data && (data.error || data.detail)) || 'Vexa returned no image.');
+    }
+    return [data.proxy_url];
+  }
+
+  window.generateImage = async function(model, prompt, attachments, signal){
+    if (String(model || '').startsWith('puter|')) {
+      return puterImage(prompt, attachments, signal);
+    }
+    if (String(model || '').startsWith('vexa|')) {
+      return vexaImage(prompt, signal);
+    }
+
+    // Preserve the original generator as an untouched last-resort hook.
+    if (originalGenerateImage) {
+      return originalGenerateImage(model, prompt, attachments, signal);
+    }
+    throw new Error('No image provider is available.');
+  };
+
+  window.FLIGHT_ZERO_BUDGET_IMAGE = true;
+  window.FLIGHT_IMAGE_PROVIDER = 'Puter.js + Vexa';
+})();
+</script>
+
+<script type="module" id="flight-auth-addition-script">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    sendPasswordResetEmail,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+  /* ============================================================
+     FLIGHT AUTH — ADD-ONLY
+     Paste the config from Firebase Console > Project settings > Web app.
+     Firebase web config is client-side configuration, not a private key.
+     ============================================================ */
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCfpQUlSNm8OkPpfYC7WrVvCogIXUYio5A",
+    authDomain: "raju-b558d.firebaseapp.com",
+    projectId: "raju-b558d",
+    storageBucket: "raju-b558d.firebasestorage.app",
+    messagingSenderId: "256095097641",
+    appId: "1:256095097641:web:a7378c2806f7b8d4381d38",
+    measurementId: "G-TDEQXNE4TT"
+  };
+
+  const authOverlay = document.getElementById('flightAuthOverlay');
+  const googleBtn = document.getElementById('flightGoogleBtn');
+  const emailBtn = document.getElementById('flightEmailBtn');
+  const emailEl = document.getElementById('flightEmail');
+  const passEl = document.getElementById('flightPassword');
+  const errEl = document.getElementById('flightAuthError');
+  const setupEl = document.getElementById('flightAuthSetup');
+  const forgotEl = document.getElementById('flightAuthForgot');
+  const modeBtns = [...document.querySelectorAll('.fa-mode')];
+  let authMode = 'signin';
+  let auth = null;
+
+  function configured(){
+    return !!FIREBASE_CONFIG.apiKey && !/^PASTE_/i.test(FIREBASE_CONFIG.apiKey) &&
+           !!FIREBASE_CONFIG.projectId && !/^PASTE_/i.test(FIREBASE_CONFIG.projectId) &&
+           !!FIREBASE_CONFIG.appId && !/^PASTE_/i.test(FIREBASE_CONFIG.appId);
+  }
+
+  function friendlyError(e){
+    const code = e && e.code ? e.code : '';
+    const map = {
+      'auth/popup-closed-by-user':'Google sign-in was cancelled.',
+      'auth/popup-blocked':'Your browser blocked the Google popup. Allow popups for this site.',
+      'auth/invalid-credential':'Email or password is incorrect.',
+      'auth/invalid-email':'Enter a valid email address.',
+      'auth/email-already-in-use':'That email already has an account. Sign in instead.',
+      'auth/weak-password':'Use a stronger password (at least 6 characters).',
+      'auth/too-many-requests':'Too many attempts. Try again later.',
+      'auth/operation-not-allowed':'Enable this sign-in provider in Firebase Authentication.',
+      'auth/unauthorized-domain':'Add this site domain under Firebase Authentication → Settings → Authorized domains.'
+    };
+    return map[code] || (e && e.message) || 'Authentication failed.';
+  }
+
+  function setBusy(v){
+    googleBtn.disabled = v;
+    emailBtn.disabled = v;
+    emailEl.disabled = v;
+    passEl.disabled = v;
+  }
+
+  function setMode(mode){
+    authMode = mode;
+    modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    emailBtn.textContent = mode === 'signin' ? 'Sign in with email' : 'Create account';
+    passEl.autocomplete = mode === 'signin' ? 'current-password' : 'new-password';
+    forgotEl.style.display = mode === 'signin' ? 'block' : 'none';
+    errEl.textContent = '';
+  }
+
+  function installAccountChip(user){
+    let chip = document.getElementById('flightAuthAccount');
+    if (!chip) {
+      const exportBtn = document.getElementById('exportBtn');
+      chip = document.createElement('button');
+      chip.id = 'flightAuthAccount';
+      chip.title = 'Sign out';
+      chip.innerHTML = '<span class="fa-avatar-wrap"></span><span class="fa-email"></span>';
+      if (exportBtn && exportBtn.parentElement) exportBtn.parentElement.insertBefore(chip, exportBtn);
+      chip.onclick = async () => {
+        try { await signOut(auth); } catch(e) { errEl.textContent = friendlyError(e); }
+      };
+    }
+    const wrap = chip.querySelector('.fa-avatar-wrap');
+    const pic = user.photoURL ? '<img src="' + user.photoURL.replace(/"/g,'&quot;') + '" alt="">' : '<span>●</span>';
+    wrap.innerHTML = pic;
+    chip.querySelector('.fa-email').textContent = user.email || user.displayName || 'Account';
+    chip.style.display = 'inline-flex';
+  }
+
+  function removeAccountChip(){
+    const chip = document.getElementById('flightAuthAccount');
+    if (chip) chip.style.display = 'none';
+  }
+
+  modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+  googleBtn.addEventListener('click', async () => {
+    if (!auth) return;
+    setBusy(true); errEl.textContent = '';
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch(e) {
+      errEl.textContent = friendlyError(e);
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  emailBtn.addEventListener('click', async () => {
+    if (!auth) return;
+    const email = emailEl.value.trim();
+    const password = passEl.value;
+    if (!email || !password) { errEl.textContent = 'Enter both email and password.'; return; }
+    setBusy(true); errEl.textContent = '';
+    try {
+      if (authMode === 'signin') await signInWithEmailAndPassword(auth, email, password);
+      else await createUserWithEmailAndPassword(auth, email, password);
+    } catch(e) {
+      errEl.textContent = friendlyError(e);
+    } finally {
+      setBusy(false);
+    }
+  });
+
+  forgotEl.addEventListener('click', async () => {
+    if (!auth) return;
+    const email = emailEl.value.trim();
+    if (!email) { errEl.textContent = 'Enter your email first.'; return; }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      errEl.textContent = 'Password-reset email sent. Check your inbox.';
+    } catch(e) {
+      errEl.textContent = friendlyError(e);
+    }
+  });
+
+  if (!configured()) {
+    googleBtn.disabled = true;
+    emailBtn.disabled = true;
+    emailEl.disabled = true;
+    passEl.disabled = true;
+    forgotEl.style.display = 'none';
+    setupEl.style.display = 'block';
+    errEl.textContent = 'Firebase config required before sign-in can work.';
+  } else {
+    try {
+      const app = initializeApp(FIREBASE_CONFIG);
+      auth = getAuth(app);
+      onAuthStateChanged(auth, user => {
+        if (user) {
+          authOverlay.style.display = 'none';
+          installAccountChip(user);
+          window.dispatchEvent(new CustomEvent('flight-auth-ready', { detail: { uid: user.uid, email: user.email } }));
+        } else {
+          authOverlay.style.display = 'grid';
+          removeAccountChip();
+        }
+      });
+    } catch(e) {
+      setupEl.style.display = 'block';
+      errEl.textContent = 'Firebase initialization failed: ' + friendlyError(e);
+    }
+  }
+</script>
+
+
+<script id="flight-global-accessors-addition">
+  window.__flightGetSessions = () => sessions;
+</script>
+<!-- FLIGHT UX / AUTH / CHAT PIN REPAIR — ADD-ONLY -->
+<style id="flight-ux-repair-addition">
+  #flightAuthBackButton{width:100%;padding:10px 14px;border-radius:10px;border:1px solid #2a3040;background:transparent;color:#8a92a6;cursor:pointer;font:inherit;margin-top:8px}
+  #flightAuthBackButton:hover{background:#161a24;color:#e7eaf2;border-color:#6ea8fe}
+  #flightAccountMenu{position:fixed;z-index:12000;min-width:230px;background:#11141c;border:1px solid #2a3040;border-radius:14px;box-shadow:0 18px 55px rgba(0,0,0,.5);padding:8px;display:none}
+  #flightAccountMenu .fam-email{padding:9px 10px 8px;color:#e7eaf2;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #flightAccountMenu .fam-divider{height:1px;background:#232838;margin:4px 0}
+  #flightAccountMenu button{width:100%;text-align:left;padding:9px 10px;border-radius:9px;background:transparent;color:#e7eaf2;font:inherit;font-size:12px}
+  #flightAccountMenu button:hover{background:#1c2130}
+  .sess .flight-pin{opacity:0;font-size:12px;flex:0 0 auto;padding:2px 4px;border-radius:6px;color:var(--muted2);transition:.13s}
+  .sess:hover .flight-pin,.sess.pinned .flight-pin{opacity:1}
+  .sess.pinned{background:color-mix(in srgb,var(--panel2) 78%,var(--accent) 22%)}
+  .sess.pinned .flight-pin{color:var(--accent)}
+  .flight-pin-group{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted2);padding:12px 10px 6px;font-weight:600}
+</style>
+<script type="module" id="flight-ux-repair-script">
+  import { getApps } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+  const flightWait = ms => new Promise(r => setTimeout(r, ms));
+  let accountMenu = null;
+  let accountMenuWired = false;
+  let sessionRenderWrapped = false;
+  let authObserver = null;
+
+  function addBackButton(){
+    const box = document.getElementById('flightAuthFinalBox') || document.getElementById('flightAuthCard');
+    if (!box || box.querySelector('#flightAuthBackButton')) return;
+    const back = document.createElement('button');
+    back.id = 'flightAuthBackButton';
+    back.type = 'button';
+    back.textContent = '← Back';
+    back.addEventListener('click', () => {
+      if (window.history.length > 1) window.history.back();
+    });
+    box.appendChild(back);
+  }
+
+  function hideLegacyAccount(){
+    const oldChip = document.getElementById('flightAuthAccount');
+    if (oldChip) oldChip.style.display = 'none';
+  }
+
+  function ensureAccountMenu(){
+    if (!accountMenu){
+      accountMenu = document.createElement('div');
+      accountMenu.id = 'flightAccountMenu';
+      accountMenu.innerHTML = '<div class="fam-email"></div><div class="fam-divider"></div><button type="button" id="flightSignOutButton">Sign out</button>';
+      document.body.appendChild(accountMenu);
+      document.addEventListener('click', e => {
+        if (accountMenu && accountMenu.style.display !== 'none' && !accountMenu.contains(e.target) && !e.target.closest('#flightAuthFinalAccount')) accountMenu.style.display='none';
+      });
+      document.addEventListener('keydown', e => { if(e.key === 'Escape' && accountMenu) accountMenu.style.display='none'; });
+      accountMenu.querySelector('#flightSignOutButton').addEventListener('click', async () => {
+        try{
+          const apps=getApps();
+          if (apps.length) await signOut(getAuth(apps[0]));
+        }catch(e){ console.error(e); }
+        accountMenu.style.display='none';
+      });
+    }
+    return accountMenu;
+  }
+
+  function wireAccountChip(){
+    hideLegacyAccount();
+    const chip = document.getElementById('flightAuthFinalAccount');
+    if (!chip) return;
+    const menu = ensureAccountMenu();
+    if (chip.dataset.flightMenuWired === '1') return;
+    chip.dataset.flightMenuWired = '1';
+    chip.onclick = e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const userEmail = chip.querySelector('.fa-email')?.textContent || 'Account';
+      menu.querySelector('.fam-email').textContent = userEmail;
+      const r = chip.getBoundingClientRect();
+      menu.style.left = Math.max(8, Math.min(window.innerWidth - 240, r.right - 230)) + 'px';
+      menu.style.top = Math.min(window.innerHeight - 120, r.bottom + 8) + 'px';
+      menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    };
+  }
+
+  function decorateSessionPins(){
+    const box=document.getElementById('sessions');
+    const getSessions=window.__flightGetSessions;
+    if(!box || typeof getSessions !== 'function') return;
+    const liveSessions=getSessions();
+    const items=[...box.querySelectorAll('.sess')];
+    const pinGroup=box.querySelector('.flight-pin-group');
+    const chatGroup=box.querySelector('.sess-group');
+    const pinnedEls=[];
+    const normalEls=[];
+
+    items.forEach((el,index)=>{
+      const session=liveSessions[index];
+      if(!session) return;
+      el.dataset.flightSid=session.id;
+      if(!el.querySelector('.flight-pin')){
+        const pin=document.createElement('button');
+        pin.type='button'; pin.className='flight-pin';
+        pin.addEventListener('click', ev => {
+          ev.stopPropagation();
+          const sid=el.dataset.flightSid;
+          const current=liveSessions.find(x=>x.id===sid);
+          if(!current) return;
+          current.pinned=!current.pinned;
+          try{ saveSessions(); }catch{}
+          try{ renderSessions(); }catch{}
+          decorateSessionPins();
+        });
+        el.insertBefore(pin,el.querySelector('.del'));
+      }
+      const isPinned=!!session.pinned;
+      el.classList.toggle('pinned',isPinned);
+      const pin=el.querySelector('.flight-pin');
+      if(pin){
+        pin.title=isPinned?'Unpin chat':'Pin chat';
+        pin.textContent=isPinned?'📌':'📍';
+      }
+      (isPinned?pinnedEls:normalEls).push(el);
+    });
+
+    let pg=pinGroup;
+    if(pinnedEls.length){
+      if(!pg){
+        pg=document.createElement('div');
+        pg.className='flight-pin-group';
+        pg.textContent='Pinned';
+        if(chatGroup) box.insertBefore(pg,chatGroup); else box.prepend(pg);
+      }
+      pg.style.display='block';
+      for(const el of pinnedEls){ if(chatGroup) box.insertBefore(el,chatGroup); else box.appendChild(el); }
+    } else if(pg){
+      pg.remove();
+    }
+    for(const el of normalEls) box.appendChild(el);
+  }
+
+  async function wrapSessionRender(){
+    if(sessionRenderWrapped || typeof window.renderSessions !== 'function') return;
+    sessionRenderWrapped=true;
+    const original=window.renderSessions;
+    window.renderSessions=function(){
+      const out=original.apply(this,arguments);
+      decorateSessionPins();
+      return out;
+    };
+    try{ window.renderSessions(); }catch{}
+  }
+
+  function observeAuthUi(){
+    addBackButton();
+    wireAccountChip();
+    const overlay=document.getElementById('flightAuthOverlay');
+    if(overlay && !authObserver){
+      authObserver=new MutationObserver(() => { addBackButton(); wireAccountChip(); hideLegacyAccount(); });
+      authObserver.observe(overlay,{subtree:true,childList:true});
+    }
+  }
+
+  window.addEventListener('flight-auth-ready', () => {
+    observeAuthUi();
+    wrapSessionRender();
+  });
+
+  observeAuthUi();
+  for(let i=0;i<80;i++){
+    await flightWait(250);
+    observeAuthUi();
+    await wrapSessionRender();
+  }
+</script>
+<!-- END FLIGHT UX / AUTH / CHAT PIN REPAIR — ADD-ONLY -->
+
+<!-- FLIGHT SEO / CRAWL FILE HINTS — ADD-ONLY -->
+<script type="application/ld+json" id="flight-seo-structured-data-fallback">
+{
+  "@context":"https://schema.org",
+  "@type":"WebSite",
+  "name":"Flight AI",
+  "alternateName":["Flight","FLI"],
+  "url":"https://flight.ai/"
+}
+</script>
+
+
+
+<!-- FLIGHT MOBILE SIDEBAR CLOSE CONTROL — ADD-ONLY -->
+<style id="flight-mobile-sidebar-close-fix">
+@media (max-width:860px){
+  .app > .sidebar{position:fixed;top:0;bottom:0;left:0;z-index:10001;transition:margin-left .22s ease;}
+  .app > .sidebar.hidden{margin-left:-272px !important;}
+  #flightMobileSidebarClose{display:grid;place-items:center;position:absolute;top:12px;right:12px;width:36px;height:36px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--muted);font-size:18px;line-height:1;z-index:10002;}
+  #flightMobileSidebarClose:hover{background:var(--panel2);color:var(--text);}
+}
+@media (min-width:861px){#flightMobileSidebarClose{display:none !important;}}
+</style>
+<script id="flight-mobile-sidebar-close-fix-script">
+(function(){
+  function setupFlightMobileSidebar(){
+    const sidebar=document.getElementById('sidebar');
+    const menu=document.getElementById('menuBtn');
+    if(!sidebar||!menu)return;
+    let close=document.getElementById('flightMobileSidebarClose');
+    if(!close){
+      close=document.createElement('button');
+      close.id='flightMobileSidebarClose';
+      close.type='button';
+      close.setAttribute('aria-label','Hide sidebar');
+      close.setAttribute('title','Hide sidebar');
+      close.textContent='✕';
+      sidebar.appendChild(close);
+    }
+    const isMobile=()=>window.innerWidth<=860;
+    const syncInitial=()=>{
+      if(isMobile()) sidebar.classList.add('hidden');
+      else sidebar.classList.remove('hidden');
+    };
+    syncInitial();
+    menu.onclick=function(){sidebar.classList.toggle('hidden');};
+    close.onclick=function(){sidebar.classList.add('hidden');};
+    let wasMobile=isMobile();
+    window.addEventListener('resize',function(){
+      const nowMobile=isMobile();
+      if(nowMobile!==wasMobile){
+        sidebar.classList.toggle('hidden',nowMobile);
+        wasMobile=nowMobile;
+      }
+    },{passive:true});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',setupFlightMobileSidebar,{once:true});
+  else setupFlightMobileSidebar();
+})();
+</script>
+
+<!-- FLIGHT MOBILE SIDEBAR REPAIR — ADD-ONLY -->
+<style id="flight-mobile-sidebar-repair">
+@media (max-width:860px){
+  /* Keep the chat sidebar closed when Flight first opens on a phone. */
+  .app > .sidebar{margin-left:-272px}
+  .app > .sidebar:not(.hidden){margin-left:-272px}
+  .app > main .topbar #menuBtn{display:grid;position:relative;z-index:60}
+  .app > .sidebar.hidden{margin-left:-272px}
+  .app > .sidebar:not(.hidden){margin-left:0}
+}
+</style>
+</body>
+
+<!-- FLIGHT AUTH REPAIR / FINAL ADD-ONLY LAYER -->
+<style id="flight-auth-final-addition">
+  #flightAuthOverlay{z-index:10000}
+  #flightAuthFinalBox{width:min(460px,calc(100vw - 32px));background:#11141c;border:1px solid #2a3040;border-radius:20px;box-shadow:0 24px 90px rgba(0,0,0,.55);padding:28px;color:#e7eaf2}
+  #flightAuthFinalBox h2{font-size:23px;margin-bottom:7px}
+  #flightAuthFinalSub{font-size:13px;color:#8a92a6;line-height:1.55;margin-bottom:18px}
+  .faf-input,.faf-json{width:100%;padding:11px 13px;margin-bottom:9px;background:#0d1016;border:1px solid #232838;border-radius:10px;color:#e7eaf2;outline:none}
+  .faf-json{min-height:145px;resize:vertical;font-family:var(--mono)}
+  .faf-input:focus,.faf-json:focus{border-color:#6ea8fe}
+  .faf-btn{width:100%;padding:11px 14px;border-radius:10px;border:1px solid #2a3040;background:#161a24;color:#e7eaf2;cursor:pointer;font:inherit;margin-top:8px}
+  .faf-btn.primary{background:linear-gradient(140deg,#6ea8fe,#a78bfa);color:#07101f;border-color:transparent;font-weight:650}
+  .faf-btn.google{background:#fff;color:#111827;border-color:#fff;font-weight:650}
+  .faf-btn:disabled{opacity:.55;cursor:not-allowed}
+  .faf-tabs{display:flex;gap:6px;margin-bottom:12px}
+  .faf-tab{flex:1;padding:8px;border-radius:9px;border:1px solid #232838;background:#0d1016;color:#8a92a6;cursor:pointer}
+  .faf-tab.active{color:#e7eaf2;border-color:#6ea8fe;background:#161a24}
+  .faf-or{text-align:center;color:#606a80;font-size:11px;margin:14px 0;display:flex;align-items:center;gap:9px}.faf-or:before,.faf-or:after{content:"";height:1px;background:#232838;flex:1}
+  #flightAuthFinalError{min-height:18px;color:#ff9d9d;font-size:12px;line-height:1.5;margin-top:10px;white-space:pre-wrap}
+  #flightAuthFinalInfo{font-size:11px;color:#8a92a6;line-height:1.5;margin-top:10px}
+  #flightAuthFinalSetup{display:none}
+  #flightAuthFinalBack{margin-top:8px;background:transparent}
+  #flightAuthFinalAccount{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border:1px solid #232838;border-radius:999px;background:#11141c;color:#8a92a6;font-size:11px;cursor:pointer;margin-right:6px;max-width:260px}
+  #flightAuthFinalAccount img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+  #flightAuthFinalAccount .fa-email{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+</style>
+<script type="module" id="flight-auth-final-script">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import {
+    getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged,
+    signInWithEmailAndPassword, createUserWithEmailAndPassword,
+    sendPasswordResetEmail, signOut, setPersistence, browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+  const overlay = document.getElementById('flightAuthOverlay');
+  if (!overlay) throw new Error('Flight auth overlay missing.');
+
+  overlay.innerHTML = `
+    <div id="flightAuthFinalBox">
+      <div id="flightAuthLogo">✈</div>
+      <h2>Welcome to Flight</h2>
+      <div id="flightAuthFinalSub">Sign in with Google or your email. Your account stays signed in on this browser.</div>
+      <div id="flightAuthFinalSignIn">
+        <button id="fafGoogle" class="faf-btn google">Continue with Google</button>
+        <div class="faf-or"><span>or</span></div>
+        <input id="fafEmail" class="faf-input" type="email" autocomplete="email" placeholder="Email address">
+        <input id="fafPass" class="faf-input" type="password" autocomplete="current-password" placeholder="Password (min 6 characters)">
+        <button id="fafEmailBtn" class="faf-btn primary">Sign in with email</button>
+        <button id="fafCreateBtn" class="faf-btn">Create account</button>
+        <button id="fafForgot" class="faf-btn">Forgot password?</button>
+      </div>
+      <div id="flightAuthFinalError"></div>
+    </div>`;
+
+  const $a = id => document.getElementById(id);
+  const err=$a('flightAuthFinalError');
+  let auth=null;
+  let busy=false;
+
+  const FLIGHT_BUILTIN_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCfpQUlSNm8OkPpfYC7WrVvCogIXUYio5A",
+    authDomain: "raju-b558d.firebaseapp.com",
+    projectId: "raju-b558d",
+    storageBucket: "raju-b558d.firebasestorage.app",
+    messagingSenderId: "256095097641",
+    appId: "1:256095097641:web:a7378c2806f7b8d4381d38",
+    measurementId: "G-TDEQXNE4TT"
+  };
+
+  function setBusy(v){
+    busy=v;
+    [$a('fafGoogle'),$a('fafEmailBtn'),$a('fafCreateBtn'),$a('fafForgot')].forEach(b=>{if(b)b.disabled=v});
+    [$a('fafEmail'),$a('fafPass')].forEach(i=>{if(i)i.disabled=v});
+  }
+  function ferr(e){
+    const c=e?.code||'';
+    const m={
+      'auth/popup-blocked':'Google popup was blocked. Allow popups for ' + location.hostname + '.',
+      'auth/popup-closed-by-user':'Google sign-in cancelled.',
+      'auth/invalid-credential':'Email or password is incorrect.',
+      'auth/invalid-email':'Enter a valid email address.',
+      'auth/email-already-in-use':'That email already has an account.',
+      'auth/weak-password':'Password must be at least 6 characters.',
+      'auth/operation-not-allowed':'Enable Google and Email/Password in Firebase Authentication.',
+      'auth/unauthorized-domain':'Add ' + location.hostname + ' to Firebase Authentication → Settings → Authorized domains.'
+    };
+    return m[c] || e?.message || 'Authentication failed.';
+  }
+
+  async function connect(){
+    const app=getApps().length?getApps()[0]:initializeApp(FLIGHT_BUILTIN_FIREBASE_CONFIG);
+    auth=getAuth(app);
+    await setPersistence(auth,browserLocalPersistence);
+    onAuthStateChanged(auth,user=>{
+      if(user){
+        overlay.style.display='none';
+        let chip=document.getElementById('flightAuthFinalAccount');
+        if(!chip){
+          const exportBtn=document.getElementById('exportBtn');
+          chip=document.createElement('button'); chip.id='flightAuthFinalAccount'; chip.title='Sign out';
+          chip.innerHTML='<span class="fa-avatar-wrap"></span><span class="fa-email"></span>';
+          exportBtn?.parentElement?.insertBefore(chip,exportBtn);
+          chip.onclick=async()=>{try{await signOut(auth)}catch(e){err.textContent=ferr(e)}};
+        }
+        chip.querySelector('.fa-email').textContent=user.email||user.displayName||'Account';
+        const w=chip.querySelector('.fa-avatar-wrap');
+        w.innerHTML=user.photoURL?'<img src="'+user.photoURL.replace(/"/g,'&quot;')+'" alt="">':'●';
+        chip.style.display='inline-flex';
+      }else{
+        overlay.style.display='grid';
+      }
+      window.dispatchEvent(new CustomEvent('flight-auth-ready',{detail:user?{uid:user.uid,email:user.email}:null}));
+    });
+  }
+
+  $a('fafGoogle').onclick=async()=>{
+    err.textContent='';
+    try{setBusy(true);await signInWithPopup(auth,new GoogleAuthProvider())}
+    catch(e){err.textContent=ferr(e)}finally{setBusy(false)}
+  };
+  $a('fafEmailBtn').onclick=async()=>{
+    const email=$a('fafEmail').value.trim(), pass=$a('fafPass').value;
+    if(!email||!pass){err.textContent='Enter email and password.';return}
+    try{setBusy(true);await signInWithEmailAndPassword(auth,email,pass)}catch(e){err.textContent=ferr(e)}finally{setBusy(false)}
+  };
+  $a('fafCreateBtn').onclick=async()=>{
+    const email=$a('fafEmail').value.trim(), pass=$a('fafPass').value;
+    if(!email||!pass){err.textContent='Enter email and password.';return}
+    try{setBusy(true);await createUserWithEmailAndPassword(auth,email,pass)}catch(e){err.textContent=ferr(e)}finally{setBusy(false)}
+  };
+  $a('fafForgot').onclick=async()=>{
+    const email=$a('fafEmail').value.trim();
+    if(!email){err.textContent='Enter your email first.';return}
+    try{setBusy(true);await sendPasswordResetEmail(auth,email);err.textContent='Password reset email sent.'}catch(e){err.textContent=ferr(e)}finally{setBusy(false)}
+  };
+
+  try{await connect()}catch(e){err.textContent=ferr(e)}
+</script>
+
+
+<!-- FLIGHT MOBILE RESPONSIVE FINAL — ADD-ONLY -->
+<style id="flight-mobile-responsive-final">
+  @media (max-width: 860px){
+    html,body{width:100%;max-width:100%;overflow:hidden}
+    .app{width:100%;min-width:0;height:100dvh}
+    .sidebar{width:min(86vw,272px);max-width:272px;flex-basis:min(86vw,272px)}
+    .sidebar.hidden{margin-left:calc(-1 * min(86vw,272px)) !important}
+    .app > main{width:100%;min-width:0}
+    .topbar{height:52px;flex-basis:52px;padding:0 9px;gap:5px}
+    .topbar .icon-btn{width:34px;height:34px;flex:0 0 34px}
+    .router-wrap{min-width:0}
+    .router-pill{max-width:44vw;padding:6px 10px;font-size:10.5px;gap:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .router-pill .dot{width:6px;height:6px;flex-basis:6px}
+    #exportBtn{flex:0 0 34px}
+    #flightAuthFinalAccount,#flightAuthAccount{max-width:34vw !important;min-width:0;padding:5px 7px !important;margin-right:2px !important;gap:5px !important;font-size:10px !important}
+    #flightAuthFinalAccount .fa-email,#flightAuthAccount .fa-email{max-width:18vw !important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #flightAuthFinalAccount img,#flightAuthAccount img{width:20px !important;height:20px !important}
+
+    .chat{min-width:0}
+    .chat-inner{width:100%;max-width:none;padding:14px 12px 7px}
+    .welcome{padding:7vh 12px 26px}
+    .welcome .glow{width:62px;height:62px;border-radius:18px;font-size:28px;margin-bottom:16px}
+    .welcome h2{font-size:22px}
+    .welcome p{font-size:13px;max-width:100%;line-height:1.55}
+    .chips{width:100%;max-width:100%;gap:7px;margin-top:20px}
+    .chip{max-width:100%;padding:9px 11px;font-size:12px}
+
+    .msg{gap:9px;padding:13px 0}
+    .msg .av{width:28px;height:28px;flex-basis:28px;font-size:10px;border-radius:8px}
+    .msg .body{min-width:0}
+    .content{font-size:14px;line-height:1.66}
+    .content h1{font-size:19px}.content h2{font-size:17px}.content h3{font-size:15.5px}.content h4{font-size:14px}
+    .content table{font-size:12px}
+    .content th,.content td{padding:7px 8px}
+    pre{font-size:11.8px;padding:11px}
+    .code-head{padding:7px 9px;font-size:10px}
+    .msg-actions{opacity:1;flex-wrap:wrap}
+    .msg-actions button{font-size:11px;padding:5px 8px}
+    .att-thumb{max-width:46vw}
+    .att-thumb img{max-height:36vw}
+    .att-file{max-width:76vw;font-size:12px}
+    .gen-img{max-width:100%;height:auto}
+
+    .composer-wrap{padding:0 8px max(8px, env(safe-area-inset-bottom))}
+    .composer-box{width:100%;max-width:none}
+    .composer{gap:3px;padding:7px 7px 7px 8px;border-radius:15px}
+    .composer textarea{font-size:14px;line-height:1.5;padding:7px 2px;min-width:0;max-height:140px}
+    .cbtn,.send{width:33px;height:33px;flex-basis:33px;border-radius:9px;font-size:14px}
+    .hint{font-size:9.5px;line-height:1.4;margin-top:7px;padding:0 4px}
+    .att-tray{gap:6px;margin-bottom:7px;max-width:100%;overflow-x:auto;overflow-y:hidden;flex-wrap:nowrap;padding-bottom:2px}
+    .att-chip{flex:0 0 auto;max-width:74vw;font-size:11px}
+
+    .scrim{padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))}
+    .modal{max-width:100%;max-height:92dvh;border-radius:15px}
+    .modal-h{padding:14px 15px}
+    .modal-b{padding:14px 15px}
+    .modal-f{padding:12px 15px}
+
+    #flightAuthOverlay{padding:max(12px,env(safe-area-inset-top)) 10px max(12px,env(safe-area-inset-bottom));overflow:auto}
+    #flightAuthFinalBox,#flightAuthCard{width:min(100%,430px);max-width:100%;padding:20px 16px;border-radius:16px;max-height:92dvh;overflow:auto}
+    #flightAuthLogo{width:44px;height:44px;border-radius:12px;font-size:20px;margin-bottom:13px}
+    #flightAuthFinalBox h2,#flightAuthCard h2{font-size:21px}
+    #flightAuthFinalSub,#flightAuthSub{font-size:12.5px;line-height:1.5}
+    .faf-input,.fa-input{font-size:16px;padding:11px 12px}
+    .faf-btn,.fa-btn{min-height:42px}
+  }
+
+  @media (max-width: 420px){
+    .router-pill{max-width:36vw;padding:6px 8px}
+    #flightAuthFinalAccount,#flightAuthAccount{max-width:31vw !important}
+    #flightAuthFinalAccount .fa-email,#flightAuthAccount .fa-email{display:none}
+    .chat-inner{padding-left:10px;padding-right:10px}
+    .composer{padding-left:6px;padding-right:6px}
+    .cbtn,.send{width:31px;height:31px;flex-basis:31px;font-size:13px}
+    .composer textarea{font-size:13.5px}
+    .hint{display:none}
+  }
+
+  @media (max-width: 340px){
+    .router-pill{display:none}
+    .topbar{justify-content:space-between}
+    #flightAuthFinalAccount,#flightAuthAccount{max-width:30px !important;width:30px;justify-content:center;padding:4px !important}
+    #flightAuthFinalAccount .fa-email,#flightAuthAccount .fa-email{display:none}
+  }
+</style>
+
+</body>
+</html>
